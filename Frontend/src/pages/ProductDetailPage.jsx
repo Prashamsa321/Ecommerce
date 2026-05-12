@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { productService } from '../services/productService'
 import { useCart } from '../hooks/useCart'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast' // Make sure this import exists
 
 const ProductDetailPage = () => {
@@ -64,12 +64,7 @@ const ProductDetailPage = () => {
           <p className="text-3xl font-bold text-blue-600 mb-4">${product.price}</p>
           <p className="text-gray-700 mb-4">{product.description}</p>
           
-          <div className="mb-4">
-            <span className="text-gray-600">Stock: </span>
-            <span className={product.countInStock > 0 ? 'text-green-600' : 'text-red-600'}>
-              {product.countInStock > 0 ? `${product.countInStock} available` : 'Out of stock'}
-            </span>
-          </div>
+        
 
           {product.countInStock > 0 && (
             <div className="mb-4 flex items-center gap-4">

@@ -1,82 +1,99 @@
 // src/components/auth/LoginForm.jsx
-import { useState } from 'react'
-import { useAuth } from '../../hooks/useAuth'
-import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import React, { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import { useNavigate, Link } from 'react-router-dom'
 
 const LoginForm = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
     setLoading(true)
-    
+
     try {
-      const success = await login(email, password)
-      
-      if (success) {
-        // Get user from localStorage after login
-        const userStr = localStorage.getItem('user')
-        const user = userStr ? JSON.parse(userStr) : null
-        
-        // Redirect based on role
-        if (user?.role === 'admin') {
-          toast.success('Welcome Admin!')
-          navigate('/admin', { replace: true })
-        } else {
-          toast.success('Login successful!')
-          navigate('/', { replace: true })
-        }
+      const result = await login(email, password)
+      if (result.success) {
+        navigate('/')
+      } else {
+        setError(result.error || 'Login failed')
       }
-    } catch (error) {
-      console.error('Login error:', error)
+    } catch (err) {
+      setError('An unexpected error occurred')
+      console.error('Login error:', err)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="input"
-          required
-          autoComplete="email"
-        />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
+        <div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+        </div>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="email" className="sr-only">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
+              />
+            </div>
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password
-        </label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="input"
-          required
-          autoComplete="current-password"
-        />
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
+          
+          <div className="text-center">
+            <Link to="/register" className="text-sm text-blue-600 hover:text-blue-500">
+              Don't have an account? Register
+            </Link>
+          </div>
+        </form>
       </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full btn-primary disabled:opacity-50"
-      >
-        {loading ? 'Logging in...' : 'Login'}
-      </button>
-    </form>
+    </div>
   )
 }
 

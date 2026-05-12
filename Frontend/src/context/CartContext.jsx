@@ -1,9 +1,8 @@
-// src/context/CartContext.jsx
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react'
 import { cartService } from '../services/cartService'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from './AuthContext'
 
-const CartContext = createContext()
+export const CartContext = createContext(null)
 
 export const useCart = () => {
   const context = useContext(CartContext)
@@ -44,6 +43,11 @@ export const CartProvider = ({ children }) => {
   const addToCart = useCallback(async (productId, quantity = 1) => {
     if (!isAuthenticated || !user) {
       setError('Please login to add items to cart')
+      return false
+    }
+
+    if (!productId) {
+      setError('Invalid product')
       return false
     }
 

@@ -1,20 +1,18 @@
-// src/services/cartService.js
 import axios from 'axios'
 
 const API_URL = 'http://localhost:5000/api'
 
-// Add token to requests
 const getAuthConfig = () => {
   const token = localStorage.getItem('token')
   return {
     headers: {
-      Authorization: `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     }
   }
 }
 
 export const cartService = {
-  // Get user's cart
   async getCart() {
     try {
       const response = await axios.get(`${API_URL}/cart`, getAuthConfig())
@@ -25,7 +23,6 @@ export const cartService = {
     }
   },
 
-  // Add item to cart
   async addToCart(productId, quantity = 1) {
     try {
       const response = await axios.post(
@@ -40,7 +37,6 @@ export const cartService = {
     }
   },
 
-  // Update cart item quantity
   async updateCartItem(productId, quantity) {
     try {
       const response = await axios.put(
@@ -55,7 +51,6 @@ export const cartService = {
     }
   },
 
-  // Remove item from cart
   async removeFromCart(productId) {
     try {
       const response = await axios.delete(
@@ -69,7 +64,6 @@ export const cartService = {
     }
   },
 
-  // Clear cart
   async clearCart() {
     try {
       const response = await axios.delete(`${API_URL}/cart/clear`, getAuthConfig())
