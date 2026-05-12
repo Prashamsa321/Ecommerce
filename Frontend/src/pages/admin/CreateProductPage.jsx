@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { productService } from '../../services/productService';
+import { categoryService } from '../../services/categoryService';
 
 const CreateProductPage = () => {
-  const { id } = useParams(); // Get product ID from URL if editing
+  const { id } = useParams();
   const navigate = useNavigate();
   const { success, error } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const isEditMode = !!id; // If ID exists, we're in edit mode
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const isEditMode = !!id;
   
   const [formData, setFormData] = useState({
     name: '',
@@ -19,6 +22,24 @@ const CreateProductPage = () => {
     stock: '',
     images: ['']
   });
+
+  // Fetch categories from database
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const data = await categoryService.getAllCategories();
+      setCategories(data);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      error('Failed to load categories');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   // Fetch product data if in edit mode
   useEffect(() => {
@@ -32,7 +53,6 @@ const CreateProductPage = () => {
       setFetching(true);
       const product = await productService.getProductById(id);
       
-      // Populate form with existing product data
       setFormData({
         name: product.name || '',
         description: product.description || '',
@@ -82,6 +102,11 @@ const CreateProductPage = () => {
     }));
   };
 
+  const formatPriceDisplay = (value) => {
+    if (!value) return '';
+    return `रू ${parseFloat(value).toLocaleString('en-IN')}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -116,11 +141,9 @@ const CreateProductPage = () => {
       };
       
       if (isEditMode) {
-        // Update existing product
         await productService.updateProduct(id, productData);
         success('Product updated successfully!');
       } else {
-        // Create new product
         await productService.createProduct(productData);
         success('Product created successfully!');
       }
@@ -134,7 +157,7 @@ const CreateProductPage = () => {
     }
   };
 
-  if (fetching) {
+  if (fetching || loadingCategories) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -190,19 +213,27 @@ const CreateProductPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price * ($)
+              Price * (Nepali Rupees - रू)
             </label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              step="0.01"
-              min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="0.00"
-              required
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-2.5 text-gray-500 font-semibold">रू</span>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                step="1"
+                min="0"
+                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0"
+                required
+              />
+            </div>
+            {formData.price && (
+              <p className="text-xs text-green-600 mt-1">
+                {formatPriceDisplay(formData.price)}
+              </p>
+            )}
           </div>
 
           <div>
@@ -221,20 +252,34 @@ const CreateProductPage = () => {
           </div>
         </div>
 
-        {/* Category */}
+        {/* Category Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Category *
           </label>
-          <input
-            type="text"
+          <select
             name="category"
             value={formData.category}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., Electronics, Clothing, Books"
             required
-          />
+          >
+            <option value="">Select a category</option>
+            {categories.length === 0 ? (
+              <option value="" disabled>No categories available. Please add categories first.</option>
+            ) : (
+              categories.map((category) => (
+                <option key={category._id} value={category.name}>
+                  {category.icon || '📦'} {category.name}
+                </option>
+              ))
+            )}
+          </select>
+          {categories.length === 0 && (
+            <p className="text-xs text-red-500 mt-1">
+              No categories found. Please add categories in the Categories page first.
+            </p>
+          )}
         </div>
 
         {/* Product Images */}
@@ -278,8 +323,8 @@ const CreateProductPage = () => {
         <div className="flex gap-3 pt-4 border-t">
           <button
             type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            disabled={loading || categories.length === 0}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Product' : 'Create Product')}
           </button>

@@ -15,7 +15,7 @@ router.get('/', getAllCategories);
 router.get('/:id', getCategoryById);
 
 // Admin only routes
-router.post('/create', protect, createCategory);
+router.post('/', protect, createCategory);
 router.put('/:id', protect, updateCategory);
 router.delete('/:id', protect, deleteCategory);
 

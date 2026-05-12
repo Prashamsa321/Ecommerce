@@ -28,7 +28,7 @@ export const getCart = async (req, res) => {
   }
 };
 
-// Add item to cart
+// Add item to cart - with check for existing items
 export const addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1 } = req.body;
@@ -61,18 +61,24 @@ export const addToCart = async (req, res) => {
     );
     
     if (existingItemIndex > -1) {
-      // Update quantity
-      cart.items[existingItemIndex].quantity += quantity;
-    } else {
-      // Add new item
-      cart.items.push({
-        productId: product._id,
-        quantity: quantity,
-        price: product.price,
-        name: product.name,
-        image: product.images?.[0] || ''
+      // Item already exists - return specific message
+      return res.status(400).json({
+        success: false,
+        alreadyInCart: true,
+        message: `${product.name} is already in your cart. You can update quantity in the cart page.`,
+        items: cart.items,
+        totalAmount: cart.totalAmount
       });
     }
+    
+    // Add new item
+    cart.items.push({
+      productId: product._id,
+      quantity: quantity,
+      price: product.price,
+      name: product.name,
+      image: product.images?.[0] || ''
+    });
     
     // Calculate total
     cart.totalAmount = cart.items.reduce((total, item) => {
@@ -83,7 +89,7 @@ export const addToCart = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      message: 'Item added to cart',
+      message: `${product.name} added to cart`,
       items: cart.items,
       totalAmount: cart.totalAmount
     });

@@ -9,14 +9,16 @@ import CartPage from './pages/CartPage';
 import Login from './pages/LoginPage';
 import Register from './pages/Register';
 import ProfilePage from './pages/ProfilePage';
-import CategoriesPage from './pages/admin/CategoriesPage';
 
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
+import CategoriesPage from './pages/admin/CategoriesPage';
 import CreateProductPage from './pages/admin/CreateProductPage';
+import AdminProfile from './pages/admin/AdminProfile';
+
 
 function App() {
   const location = useLocation();
@@ -42,10 +44,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* Protected User Routes - For regular users only */}
-        <Route element={<PrivateRoute adminOnly={false} />}>
+  
           <Route path="/profile" element={<ProfilePage />} />
-        </Route>
+  
         
         {/* Admin Routes - For admin only */}
         <Route path="/admin" element={
@@ -60,6 +61,7 @@ function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="categories" element={<CategoriesPage />} />
+          <Route path="profile" element={<AdminProfile />} />
 
         </Route>
       </Routes>

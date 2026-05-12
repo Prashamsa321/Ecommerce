@@ -17,7 +17,6 @@ export const productService = {
   async getAllProducts() {
     try {
       const response = await axios.get(`${API_URL}/products/getproduct`)
-      console.log('Products API response:', response.data)
       
       if (response.data && response.data.success && Array.isArray(response.data.products)) {
         return response.data.products

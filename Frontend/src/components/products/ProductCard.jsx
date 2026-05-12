@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import ProductModal from '.././ProductModal';
+import ProductModal from '../ProductModal';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
-  const { success, error } = useToast();
+  const { success, error, info } = useToast(); // Add info toast
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const isAdmin = user?.role === 'admin';
 
   const handleAddToCart = async () => {
@@ -16,21 +17,21 @@ const ProductCard = ({ product }) => {
       error('Admin users cannot add items to cart');
       return;
     }
+    
+    setIsAdding(true);
     const result = await addToCart(product._id, 1);
-    if (result) {
+    setIsAdding(false);
+    
+    if (result.success) {
       success(`${product.name} added to cart!`);
-    } else {
-      error('Please login to add items to cart');
+    } else if (result.alreadyInCart) {
+      // Show info toast for already in cart
+      info(result.message || `${product.name} is already in your cart!`);
     }
+    // Other errors are handled by the context and shown via error toast
   };
 
-  // Truncate text with ellipsis
-  const truncateText = (text, maxLength = 50) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-
+  // Rest of your component remains the same...
   return (
     <>
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
@@ -48,22 +49,22 @@ const ProductCard = ({ product }) => {
         </div>
         
         <div className="p-4 flex flex-col flex-grow">
-          {/* Product Name - Fixed overflow with ellipsis */}
+          {/* Product Name */}
           <div className="mb-2">
             <h3 className="font-semibold text-lg text-gray-800 line-clamp-2 break-words">
-            {truncateText(product.name, 30)}
+              {product.name}
             </h3>
           </div>
           
-          {/* Product Description - Truncated */}
+          {/* Product Description */}
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {truncateText(product.description, 35)}
+            {product.description?.substring(0, 80)}...
           </p>
           
           {/* Price and Stock */}
           <div className="flex justify-between items-center mb-3">
             <span className="text-2xl font-bold text-blue-600">
-              ${product.price?.toFixed(2)}
+              रु {product.price?.toFixed(2)}
             </span>
             {product.stock > 0 ? (
               <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
@@ -88,12 +89,12 @@ const ProductCard = ({ product }) => {
             {!isAdmin && (
               <button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
+                disabled={product.stock === 0 || isAdding}
                 className={`flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg transition-colors text-sm ${
-                  product.stock === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                  product.stock === 0 || isAdding ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
                 }`}
               >
-                Add to Cart
+                {isAdding ? 'Adding...' : 'Add to Cart'}
               </button>
             )}
           </div>

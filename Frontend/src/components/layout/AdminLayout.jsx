@@ -11,13 +11,13 @@ function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
-  
+
   const navItems = [
     { path: "/admin", name: "Dashboard", icon: "📊", dropdown: false },
-    { 
-      path: "#", 
-      name: "Products", 
-      icon: "📦", 
+    {
+      path: "#",
+      name: "Products",
+      icon: "📦",
       dropdown: true,
       dropdownItems: [
         { path: "/admin/products", name: "All Products", icon: "📋" },
@@ -27,13 +27,12 @@ function AdminLayout() {
     },
     { path: "/admin/orders", name: "Orders", icon: "🛒", dropdown: false },
     { path: "/admin/users", name: "Users", icon: "👥", dropdown: false },
-    { path: "/admin/analytics", name: "Analytics", icon: "📈", dropdown: false },
     { path: "/admin/settings", name: "Settings", icon: "⚙️", dropdown: false },
   ];
 
   // Check if current path is related to products
   const isProductsRoute = location.pathname.includes('/admin/products') || location.pathname.includes('/admin/categories');
-  
+
   // Automatically open Products dropdown when on products-related pages
   useEffect(() => {
     if (isProductsRoute) {
@@ -57,7 +56,7 @@ function AdminLayout() {
       navigate('/login');
       return;
     }
-    
+
     if (user && user.role !== 'admin') {
       toastError("Access denied. Admin privileges required.");
       navigate('/');
@@ -133,7 +132,7 @@ function AdminLayout() {
             const isAnyDropdownActive = item.dropdown && item.dropdownItems.some(
               subItem => location.pathname === subItem.path
             );
-            
+
             return (
               <div key={item.name} className="dropdown-container">
                 {item.dropdown ? (
@@ -141,11 +140,10 @@ function AdminLayout() {
                     {/* Dropdown Button */}
                     <button
                       onClick={() => toggleDropdown(item.name)}
-                      className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                        isAnyDropdownActive
+                      className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${isAnyDropdownActive
                           ? 'bg-blue-600 text-white shadow-lg'
                           : 'text-blue-100 hover:bg-blue-600 hover:text-white'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-xl">{item.icon}</span>
@@ -162,7 +160,7 @@ function AdminLayout() {
                         </svg>
                       )}
                     </button>
-                    
+
                     {/* Dropdown Items - Show when open OR when on products page */}
                     {isSidebarOpen && (isDropdownOpen || isAnyDropdownActive) && (
                       <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-500 pl-3">
@@ -170,12 +168,11 @@ function AdminLayout() {
                           <Link
                             key={subItem.path}
                             to={subItem.path}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                              location.pathname === subItem.path
+                            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${location.pathname === subItem.path
                                 ? 'bg-blue-600 text-white'
                                 : 'text-blue-200 hover:bg-blue-600 hover:text-white'
-                            }`}
-                            // Removed the onClick that closed the dropdown
+                              }`}
+                          // Removed the onClick that closed the dropdown
                           >
                             <span className="text-base">{subItem.icon}</span>
                             <span className="text-sm">{subItem.name}</span>
@@ -183,7 +180,7 @@ function AdminLayout() {
                         ))}
                       </div>
                     )}
-                    
+
                     {/* Tooltip for collapsed sidebar */}
                     {!isSidebarOpen && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
@@ -194,11 +191,10 @@ function AdminLayout() {
                 ) : (
                   <Link
                     to={item.path}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${isActive
                         ? "bg-blue-600 text-white shadow-lg"
                         : "text-blue-100 hover:bg-blue-600 hover:text-white"
-                    }`}
+                      }`}
                   >
                     <span className="text-xl">{item.icon}</span>
                     {isSidebarOpen && <span className="font-medium">{item.name}</span>}
@@ -233,7 +229,7 @@ function AdminLayout() {
           <div className="flex items-center gap-2">
             {/* Welcome message removed as requested */}
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* User Profile Dropdown */}
             <div className="relative">
@@ -260,7 +256,6 @@ function AdminLayout() {
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                       <p className="text-xs text-gray-500">{user?.email}</p>
-                      <p className="text-xs text-blue-600 mt-1 capitalize">Role: {user?.role}</p>
                     </div>
                     <Link
                       to="/admin/profile"

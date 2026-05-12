@@ -124,7 +124,7 @@ const CartPage = () => {
                   </div>
                   
                   <div className="md:col-span-2 text-center">
-                    <span className="text-gray-600">${(item.price || 0).toFixed(2)}</span>
+                    <span className="text-gray-600">रु{(item.price || 0).toFixed(2)}</span>
                   </div>
                   
                   <div className="md:col-span-2">
@@ -147,7 +147,7 @@ const CartPage = () => {
                   
                   <div className="md:col-span-1 text-center">
                     <span className="font-semibold text-gray-800">
-                      ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                    रु{((item.price || 0) * (item.quantity || 0)).toFixed(1)}
                     </span>
                   </div>
                   
@@ -173,16 +173,13 @@ const CartPage = () => {
             <div className="space-y-3 mb-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal:</span>
-                <span className="text-gray-800">${getCartTotal().toFixed(2)}</span>
+                <span className="text-gray-800">रु{getCartTotal().toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping:</span>
-                <span className="text-gray-800">$0.00</span>
-              </div>
+            
               <div className="border-t pt-3 mt-3">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>रु{getCartTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>

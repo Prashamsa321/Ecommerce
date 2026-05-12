@@ -16,7 +16,10 @@ export const cartService = {
   async getCart() {
     try {
       const response = await axios.get(`${API_URL}/cart`, getAuthConfig())
-      return response.data
+      return {
+        items: response.data?.items || [],
+        totalAmount: response.data?.totalAmount || 0
+      }
     } catch (error) {
       console.error('Get cart error:', error.response?.data || error.message)
       throw error
@@ -29,11 +32,17 @@ export const cartService = {
         `${API_URL}/cart/addtocart`,
         { productId, quantity },
         getAuthConfig()
-      )
-      return response.data
+      );
+      console.log('Add to cart response:', response.data);
+      return {
+        success: response.data.success,
+        alreadyInCart: response.data.alreadyInCart || false,
+        message: response.data.message,
+        items: response.data?.items || [],
+        totalAmount: response.data?.totalAmount || 0
+      };
     } catch (error) {
-      console.error('Add to cart error:', error.response?.data || error.message)
-      throw error
+      throw error;
     }
   },
 
@@ -44,7 +53,10 @@ export const cartService = {
         { productId, quantity },
         getAuthConfig()
       )
-      return response.data
+      return {
+        items: response.data?.items || [],
+        totalAmount: response.data?.totalAmount || 0
+      }
     } catch (error) {
       console.error('Update cart error:', error.response?.data || error.message)
       throw error
@@ -57,7 +69,10 @@ export const cartService = {
         `${API_URL}/cart/remove/${productId}`,
         getAuthConfig()
       )
-      return response.data
+      return {
+        items: response.data?.items || [],
+        totalAmount: response.data?.totalAmount || 0
+      }
     } catch (error) {
       console.error('Remove from cart error:', error.response?.data || error.message)
       throw error
@@ -67,7 +82,10 @@ export const cartService = {
   async clearCart() {
     try {
       const response = await axios.delete(`${API_URL}/cart/clear`, getAuthConfig())
-      return response.data
+      return {
+        items: response.data?.items || [],
+        totalAmount: response.data?.totalAmount || 0
+      }
     } catch (error) {
       console.error('Clear cart error:', error.response?.data || error.message)
       throw error

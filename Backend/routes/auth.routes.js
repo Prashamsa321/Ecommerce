@@ -3,7 +3,10 @@ import { protect } from '../middleware/auth.middleware.js';
 import { 
   register, 
   login, 
-  getMe 
+  getMe,
+  updateUserRole,
+  deleteUser,
+  updateProfile,
 } from '../controllers/auth.controller.js';
 import User from '../models/User.js';
 
@@ -13,10 +16,14 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 
+router.put('/updateprofile', protect, updateProfile); 
+
 // Protected routes
 router.get('/me', protect, getMe);
 
-// Admin only route to get all users
+
+
+// Admin only routes
 router.get('/users', protect, async (req, res) => {
   try {
     // Check if user is admin
@@ -41,5 +48,12 @@ router.get('/users', protect, async (req, res) => {
     });
   }
 });
+
+// Update user role (admin only)
+router.put('/users/:id/role', protect, updateUserRole);
+
+// Delete user (admin only)
+router.delete('/users/:id', protect, deleteUser);
+
 
 export default router;

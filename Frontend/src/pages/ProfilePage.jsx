@@ -61,7 +61,6 @@ const ProfilePage = () => {
               
               <h3 className="font-semibold text-xl text-gray-800">{user.name || 'User'}</h3>
               <p className="text-sm text-gray-500 mt-1">{user.email}</p>
-              <p className="text-xs text-blue-600 mt-2 capitalize">Role: {user.role || 'user'}</p>
               
               <div className="border-t border-gray-200 my-4"></div>
               
@@ -94,17 +93,7 @@ const ProfilePage = () => {
                   <p className="text-gray-800 font-medium">{user.email}</p>
                 </div>
                 
-                {/* Role */}
-                <div className="border-b border-gray-100 pb-3">
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Account Type</label>
-                  <p className="text-gray-800 font-medium capitalize">{user.role || 'User'}</p>
-                </div>
-                
-                {/* User ID */}
-                <div className="border-b border-gray-100 pb-3">
-                  <label className="block text-sm font-medium text-gray-500 mb-1">User ID</label>
-                  <p className="text-gray-800 font-mono text-sm">{user._id || 'Not available'}</p>
-                </div>
+               
               </div>
 
               {/* Action Buttons */}

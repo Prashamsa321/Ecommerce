@@ -10,6 +10,11 @@ const AdminProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { success, error } = useToast();
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Products per page
+  const [totalPages, setTotalPages] = useState(1);
+  
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
@@ -22,12 +27,52 @@ const AdminProducts = () => {
     try {
       setLoading(true);
       const data = await productService.getAllProducts();
-      setProducts(Array.isArray(data) ? data : []);
+      const productsArray = Array.isArray(data) ? data : [];
+      setProducts(productsArray);
+      setTotalPages(Math.ceil(productsArray.length / itemsPerPage));
+      setCurrentPage(1);
     } catch (err) {
       error('Failed to fetch products');
       setProducts([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Filter products based on search
+  const filteredProducts = products.filter(product =>
+    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Update total pages when filtered products change
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
+    setCurrentPage(1);
+  }, [searchTerm, filteredProducts.length]);
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Pagination controls
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -59,11 +104,6 @@ const AdminProducts = () => {
     setProductToDelete(null);
   };
 
-  const filteredProducts = products.filter(product =>
-    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -88,15 +128,20 @@ const AdminProducts = () => {
         </Link>
       </div>
 
-      {/* Search */}
+      {/* Search and Results Info */}
       <div className="bg-white rounded-lg shadow-md p-4">
-        <input
-          type="text"
-          placeholder="Search products by name or category..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+        <div className="flex flex-col md:flex-row justify-between gap-4">
+          <input
+            type="text"
+            placeholder="Search products by name or category..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <div className="text-sm text-gray-500 flex items-center">
+            Total: {filteredProducts.length} products
+          </div>
+        </div>
       </div>
 
       {/* Products Table */}
@@ -123,7 +168,7 @@ const AdminProducts = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.length === 0 ? (
+              {currentProducts.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
                     <p className="text-4xl mb-2">📦</p>
@@ -139,7 +184,7 @@ const AdminProducts = () => {
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((product) => (
+                currentProducts.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-50 transition-colors">
                     {/* Product Image & Name */}
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -156,7 +201,7 @@ const AdminProducts = () => {
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{product.name?.substring(0,20)}</p>
+                          <p className="text-sm font-medium text-gray-900">{product.name?.substring(0, 30)}</p>
                           <p className="text-xs text-gray-500 truncate max-w-xs">
                             {product.description?.substring(0, 50)}...
                           </p>
@@ -171,10 +216,10 @@ const AdminProducts = () => {
                       </span>
                     </td>
 
-                    {/* Price */}
+                    {/* Price - Nepali Rupees */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-semibold text-blue-600">
-                        ${product.price?.toFixed(2) || '0.00'}
+                        रू {product.price?.toLocaleString('en-IN') || '0'}
                       </span>
                     </td>
 
@@ -217,6 +262,85 @@ const AdminProducts = () => {
           </table>
         </div>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
+          <div className="text-sm text-gray-500">
+            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length} products
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className={`px-3 py-2 rounded-lg transition-colors ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex gap-1">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => goToPage(pageNum)}
+                    className={`w-10 h-10 rounded-lg transition-colors ${
+                      currentPage === pageNum
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <>
+                  <span className="px-2 py-2 text-gray-500">...</span>
+                  <button
+                    onClick={() => goToPage(totalPages)}
+                    className="w-10 h-10 rounded-lg transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-2 rounded-lg transition-colors ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       <Modal
