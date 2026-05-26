@@ -23,7 +23,6 @@ const CreateProductPage = () => {
     images: ['']
   });
 
-  // Fetch categories from database
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -41,7 +40,6 @@ const CreateProductPage = () => {
     }
   };
 
-  // Fetch product data if in edit mode
   useEffect(() => {
     if (isEditMode) {
       fetchProductData();
@@ -110,7 +108,6 @@ const CreateProductPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
     if (!formData.name.trim()) {
       error('Product name is required');
       return;
@@ -160,7 +157,10 @@ const CreateProductPage = () => {
   if (fetching || loadingCategories) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+        </div>
       </div>
     );
   }
@@ -168,18 +168,18 @@ const CreateProductPage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-white">
           {isEditMode ? 'Edit Product' : 'Create New Product'}
         </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-slate-400 mt-1">
           {isEditMode ? 'Update your product information' : 'Add a new product to your store'}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-slate-800 rounded-xl shadow-lg p-6 space-y-6 border border-slate-700">
         {/* Product Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-slate-300 mb-2">
             Product Name *
           </label>
           <input
@@ -187,7 +187,7 @@ const CreateProductPage = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter product name"
             required
           />
@@ -195,7 +195,7 @@ const CreateProductPage = () => {
 
         {/* Product Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-slate-300 mb-2">
             Description *
           </label>
           <textarea
@@ -203,7 +203,7 @@ const CreateProductPage = () => {
             value={formData.description}
             onChange={handleChange}
             rows="4"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             placeholder="Enter product description"
             required
           />
@@ -212,11 +212,11 @@ const CreateProductPage = () => {
         {/* Price and Stock */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Price * (Nepali Rupees - रू)
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-gray-500 font-semibold">रू</span>
+              <span className="absolute left-3 top-3 text-slate-500 font-semibold">रू</span>
               <input
                 type="number"
                 name="price"
@@ -224,20 +224,20 @@ const CreateProductPage = () => {
                 onChange={handleChange}
                 step="1"
                 min="0"
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-8 pr-3 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0"
                 required
               />
             </div>
             {formData.price && (
-              <p className="text-xs text-green-600 mt-1">
+              <p className="text-xs text-teal-400 mt-1">
                 {formatPriceDisplay(formData.price)}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Stock Quantity
             </label>
             <input
@@ -246,7 +246,7 @@ const CreateProductPage = () => {
               value={formData.stock}
               onChange={handleChange}
               min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="0"
             />
           </div>
@@ -254,14 +254,14 @@ const CreateProductPage = () => {
 
         {/* Category Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-slate-300 mb-2">
             Category *
           </label>
           <select
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
             required
           >
             <option value="">Select a category</option>
@@ -276,7 +276,7 @@ const CreateProductPage = () => {
             )}
           </select>
           {categories.length === 0 && (
-            <p className="text-xs text-red-500 mt-1">
+            <p className="text-xs text-red-400 mt-1">
               No categories found. Please add categories in the Categories page first.
             </p>
           )}
@@ -284,7 +284,7 @@ const CreateProductPage = () => {
 
         {/* Product Images */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-slate-300 mb-2">
             Product Images (URLs)
           </label>
           {formData.images.map((image, index) => (
@@ -293,14 +293,14 @@ const CreateProductPage = () => {
                 type="url"
                 value={image}
                 onChange={(e) => handleImageChange(index, e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder={`Image URL ${index + 1}`}
               />
               {formData.images.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeImageField(index)}
-                  className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                  className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
                 >
                   Remove
                 </button>
@@ -310,28 +310,28 @@ const CreateProductPage = () => {
           <button
             type="button"
             onClick={addImageField}
-            className="mt-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+            className="mt-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
             + Add Another Image
           </button>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Enter image URLs (e.g., https://example.com/image.jpg)
           </p>
         </div>
 
         {/* Form Buttons */}
-        <div className="flex gap-3 pt-4 border-t">
+        <div className="flex gap-3 pt-4 border-t border-slate-700">
           <button
             type="submit"
             disabled={loading || categories.length === 0}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Product' : 'Create Product')}
           </button>
           <button
             type="button"
             onClick={() => navigate('/admin/products')}
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+            className="flex-1 bg-slate-700 text-slate-300 py-3 rounded-lg font-medium hover:bg-slate-600 transition-all duration-300"
           >
             Cancel
           </button>

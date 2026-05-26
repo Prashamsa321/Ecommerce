@@ -9,8 +9,13 @@ import CartPage from './pages/CartPage';
 import Login from './pages/LoginPage';
 import Register from './pages/Register';
 import ProfilePage from './pages/ProfilePage';
+import ContactPage from './pages/ContactPage';
+import ForgotPassword from './pages/ForgotPassword';
+
+
 
 // Admin pages
+import AdminContacts from './pages/admin/AdminContacts';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -43,7 +48,10 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+
   
           <Route path="/profile" element={<ProfilePage />} />
   
@@ -62,6 +70,8 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="profile" element={<AdminProfile />} />
+          <Route path="contacts" element={<AdminContacts />} />
+
 
         </Route>
       </Routes>

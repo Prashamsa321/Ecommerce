@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
   phone: {
     type: String,
     default: ''
@@ -25,21 +30,27 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  role: {
+  city: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    default: ''
+  },
+  postalCode: {
+    type: String,
+    default: ''
+  },
+  resetPasswordOTP: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
   },
   createdAt: {
     type: Date,
     default: Date.now
   }
-})
+});
 
-// Remove any existing model to prevent overwrite issues
-if (mongoose.models.User) {
-  delete mongoose.models.User
-}
-
-const User = mongoose.model('User', userSchema)
-export default User
+const User = mongoose.model('User', userSchema);
+export default User;

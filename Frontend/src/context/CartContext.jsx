@@ -18,7 +18,6 @@ export const CartProvider = ({ children }) => {
   const [error, setError] = useState(null)
   const { user, isAuthenticated } = useAuth()
 
-  // Fetch cart function
   const fetchCart = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setCartItems([])
@@ -39,49 +38,53 @@ export const CartProvider = ({ children }) => {
     }
   }, [isAuthenticated, user])
 
-// Add to cart function
-const addToCart = useCallback(async (productId, quantity = 1) => {
-  if (!isAuthenticated || !user) {
-    setError('Please login to add items to cart');
-    return { success: false, alreadyInCart: false };
-  }
-
-  if (!productId) {
-    setError('Invalid product');
-    return { success: false, alreadyInCart: false };
-  }
-
-  try {
-    setLoading(true);
-    setError(null);
-    const data = await cartService.addToCart(productId, quantity);
-    
-    // Check if item is already in cart
-    if (data.alreadyInCart) {
-      // Return special response for already in cart
-      return { success: false, alreadyInCart: true, message: data.message };
-    }
-    
-    setCartItems(data.items || []);
-    return { success: true, alreadyInCart: false };
-  } catch (error) {
-    
-    // Check if error response indicates item already in cart
-    if (error.response?.data?.alreadyInCart) {
+  const addToCart = useCallback(async (productId, quantity = 1) => {
+    if (!isAuthenticated || !user) {
+      // Return specific error for toast display
       return { 
         success: false, 
-        alreadyInCart: true, 
-        message: error.response.data.message 
+        error: 'Please login to add items to cart',
+        notAuthenticated: true 
       };
     }
-    
-    setError(error.response?.data?.message || 'Failed to add to cart');
-    return { success: false, alreadyInCart: false };
-  } finally {
-    setLoading(false);
-  }
-}, [isAuthenticated, user]);
-  // Update cart item quantity
+
+    if (!productId) {
+      return { success: false, error: 'Invalid product' };
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await cartService.addToCart(productId, quantity);
+      
+      if (data.alreadyInCart) {
+        return { 
+          success: false, 
+          alreadyInCart: true, 
+          message: data.message,
+          error: data.message
+        };
+      }
+      
+      setCartItems(data.items || []);
+      return { success: true };
+    } catch (error) {
+      if (error.response?.data?.alreadyInCart) {
+        return { 
+          success: false, 
+          alreadyInCart: true, 
+          message: error.response.data.message,
+          error: error.response.data.message
+        };
+      }
+      
+      const errorMessage = error.response?.data?.message || 'Failed to add to cart';
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user]);
+
   const updateQuantity = useCallback(async (productId, quantity) => {
     if (!isAuthenticated || !user) return
 
@@ -98,7 +101,6 @@ const addToCart = useCallback(async (productId, quantity = 1) => {
     }
   }, [isAuthenticated, user])
 
-  // Remove from cart
   const removeFromCart = useCallback(async (productId) => {
     if (!isAuthenticated || !user) return
 
@@ -115,7 +117,6 @@ const addToCart = useCallback(async (productId, quantity = 1) => {
     }
   }, [isAuthenticated, user])
 
-  // Clear cart
   const clearCart = useCallback(async () => {
     if (!isAuthenticated || !user) return
 
@@ -132,20 +133,16 @@ const addToCart = useCallback(async (productId, quantity = 1) => {
     }
   }, [isAuthenticated, user])
 
-  // Get total unique items count (number of different products) - FIXED
   const getCartCount = useCallback(() => {
     if (!Array.isArray(cartItems)) return 0;
-    // Return the count of unique products (cart items length)
     return cartItems.length;
   }, [cartItems])
 
-  // Get cart total (sum of price * quantity)
   const getCartTotal = useCallback(() => {
     if (!Array.isArray(cartItems)) return 0;
     return cartItems.reduce((total, item) => total + ((item.price || 0) * (item.quantity || 0)), 0)
   }, [cartItems])
 
-  // Fetch cart when user changes
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchCart()

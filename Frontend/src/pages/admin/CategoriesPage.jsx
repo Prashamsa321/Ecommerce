@@ -12,25 +12,16 @@ const CategoriesPage = () => {
   const [editIcon, setEditIcon] = useState('');
   const { success, error } = useToast();
   
-  // Modal state for delete
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  // Icon options for dropdown (for selection only, not displayed as categories)
   const iconOptions = [
-    { icon: '📺' },
-    { icon: '🧊' },
-    { icon: '❄️' },
-    { icon: '⌚' },
-    { icon: '📱' },
-    { icon: '💻' },
-    { icon: '🎧' },
-    { icon: '🎮' },
-    { icon: '📷' },
-    { icon: '🔊' }
+    { icon: '📺' }, { icon: '🧊' }, { icon: '❄️' }, { icon: '⌚' },
+    { icon: '📱' }, { icon: '💻' }, { icon: '🎧' }, { icon: '🎮' },
+    { icon: '📷' }, { icon: '🔊' }, { icon: '🖥️' }, { icon: '⌨️' },
+    { icon: '🖨️' }, { icon: '📡' }, { icon: '🔋' }, { icon: '💾' }
   ];
 
-  // Fetch categories from backend (only real categories from database)
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -39,7 +30,7 @@ const CategoriesPage = () => {
     try {
       setLoading(true);
       const data = await categoryService.getAllCategories();
-      setCategories(data); // Only categories from database
+      setCategories(data);
     } catch (err) {
       console.error('Fetch categories error:', err);
       error('Failed to load categories');
@@ -57,12 +48,12 @@ const CategoriesPage = () => {
     try {
       await categoryService.createCategory({
         name: newCategoryName,
-        icon: '📦' // Default icon
+        icon: '📦'
       });
       
       success('Category added successfully');
       setNewCategoryName('');
-      fetchCategories(); // Refresh list from database
+      fetchCategories();
     } catch (err) {
       error(err.response?.data?.message || 'Failed to add category');
     }
@@ -88,7 +79,7 @@ const CategoriesPage = () => {
       
       success('Category updated successfully');
       setEditingCategory(null);
-      fetchCategories(); // Refresh list from database
+      fetchCategories();
     } catch (err) {
       error(err.response?.data?.message || 'Failed to update category');
     }
@@ -112,7 +103,7 @@ const CategoriesPage = () => {
         success('Category deleted successfully');
         setDeleteModalOpen(false);
         setCategoryToDelete(null);
-        fetchCategories(); // Refresh list from database
+        fetchCategories();
       } catch (err) {
         error(err.response?.data?.message || 'Failed to delete category');
       }
@@ -122,7 +113,10 @@ const CategoriesPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+        </div>
       </div>
     );
   }
@@ -132,66 +126,58 @@ const CategoriesPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Categories</h1>
-          <p className="text-gray-600 mt-1">Manage your product categories</p>
+          <h1 className="text-2xl font-bold text-white">Categories</h1>
+          <p className="text-slate-400 mt-1">Manage your product categories</p>
         </div>
-        <div className="text-sm text-gray-500">
-          Total: {categories.length} categories
+        <div className="text-sm text-slate-400">
+          Total: <span className="text-white font-semibold">{categories.length}</span> categories
         </div>
       </div>
 
       {/* Add Category */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Add New Category</h2>
+      <div className="bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
+        <h2 className="text-lg font-semibold text-white mb-4">Add New Category</h2>
         <div className="flex flex-col md:flex-row gap-3">
           <input
             type="text"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             placeholder="Enter category name"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button
             onClick={handleAddCategory}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <span className="text-lg">+</span> Add Category
           </button>
         </div>
       </div>
 
-      {/* Categories Table - Shows ONLY database categories */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Categories Table */}
+      <div className="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-slate-700">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-700">
+            <thead className="bg-slate-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Icon
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Products
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Icon</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Category Name</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Products</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-slate-800 divide-y divide-slate-700">
               {categories.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
-                    <div className="text-4xl mb-2">🏷️</div>
+                  <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
+                    <div className="text-5xl mb-2">🏷️</div>
                     <p>No categories found</p>
                     <p className="text-sm mt-1">Click "Add Category" to create your first category</p>
                   </td>
                 </tr>
               ) : (
                 categories.map((category) => (
-                  <tr key={category._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={category._id} className="hover:bg-slate-700/50 transition-colors">
                     {editingCategory?._id === category._id ? (
                       // Edit Mode
                       <>
@@ -199,11 +185,11 @@ const CategoriesPage = () => {
                           <select
                             value={editIcon}
                             onChange={(e) => setEditIcon(e.target.value)}
-                            className="px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
                           >
                             {iconOptions.map(option => (
                               <option key={option.icon} value={option.icon}>
-                                {option.icon} {option.name}
+                                {option.icon}
                               </option>
                             ))}
                           </select>
@@ -213,17 +199,17 @@ const CategoriesPage = () => {
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-3 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600">{category.productCount || 0}</span>
+                          <span className="text-slate-400">{category.productCount || 0}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={handleUpdateCategory}
-                              className="text-green-600 hover:text-green-800 transition-colors p-1"
+                              className="text-green-400 hover:text-green-300 transition-colors p-1"
                               title="Save"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +218,7 @@ const CategoriesPage = () => {
                             </button>
                             <button
                               onClick={handleCancelEdit}
-                              className="text-gray-600 hover:text-gray-800 transition-colors p-1"
+                              className="text-slate-400 hover:text-white transition-colors p-1"
                               title="Cancel"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,16 +229,16 @@ const CategoriesPage = () => {
                         </td>
                       </>
                     ) : (
-                      // View Mode - Shows ONLY database categories
+                      // View Mode
                       <>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-2xl">{category.icon || '📦'}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="font-medium text-gray-800">{category.name}</span>
+                          <span className="font-medium text-white">{category.name}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full border border-blue-500/30">
                             📦 {category.productCount || 0}
                           </span>
                         </td>
@@ -260,7 +246,7 @@ const CategoriesPage = () => {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEditCategory(category)}
-                              className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                              className="text-blue-400 hover:text-blue-300 transition-colors p-1"
                               title="Edit Category"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,7 +255,7 @@ const CategoriesPage = () => {
                             </button>
                             <button
                               onClick={() => openDeleteModal(category)}
-                              className="text-red-600 hover:text-red-800 transition-colors p-1"
+                              className="text-red-400 hover:text-red-300 transition-colors p-1"
                               title="Delete Category"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

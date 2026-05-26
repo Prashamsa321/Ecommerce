@@ -4,31 +4,62 @@
 
 @layer base {
   body {
-    @apply bg-gray-50;
+    @apply bg-black text-[#F5F5F7];
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors;
+    @apply bg-[#007AFF] text-white px-6 py-3 rounded-full font-medium 
+           hover:bg-[#0056CC] transition-all duration-300 
+           shadow-lg hover:shadow-xl active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors;
+    @apply bg-[#2C2C2E] text-[#F5F5F7] px-6 py-3 rounded-full font-medium 
+           hover:bg-[#3A3A3C] transition-all duration-300 
+           border border-[#3A3A3C] active:scale-95;
   }
   
   .btn-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors;
+    @apply bg-[#FF3B30] text-white px-6 py-3 rounded-full font-medium 
+           hover:bg-[#FF2D55] transition-all duration-300 
+           shadow-lg hover:shadow-xl active:scale-95;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full px-4 py-3 bg-[#1C1C1E] border border-[#3A3A3C] rounded-xl 
+           text-[#F5F5F7] placeholder-[#A1A1A6] 
+           focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent 
+           transition-all duration-300;
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-[#1C1C1E] rounded-2xl shadow-2xl p-6 
+           border border-[#2C2C2E] backdrop-blur-sm;
   }
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3A3A3C;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4A4A4C;
+}
+
+/* Animations */
 @keyframes slide-up {
   from {
     transform: translateY(100%);
@@ -40,16 +71,20 @@
   }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-@keyframes fade-in {
+@keyframes slide-down {
   from {
+    transform: translateY(-20px);
     opacity: 0;
   }
   to {
+    transform: translateY(0);
     opacity: 1;
   }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scale-up {
@@ -63,10 +98,32 @@
   }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
 
 .animate-scale-up {
-  animation: scale-up 0.2s ease-out;
+  animation: scale-up 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }

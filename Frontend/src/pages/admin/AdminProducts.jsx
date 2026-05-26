@@ -10,12 +10,10 @@ const AdminProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { success, error } = useToast();
   
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Products per page
+  const [itemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
@@ -39,24 +37,20 @@ const AdminProducts = () => {
     }
   };
 
-  // Filter products based on search
   const filteredProducts = products.filter(product =>
     product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Update total pages when filtered products change
   useEffect(() => {
     setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
     setCurrentPage(1);
   }, [searchTerm, filteredProducts.length]);
 
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Pagination controls
   const goToPage = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -76,13 +70,11 @@ const AdminProducts = () => {
     }
   };
 
-  // Open delete confirmation modal
   const openDeleteModal = (product) => {
     setProductToDelete(product);
     setModalOpen(true);
   };
 
-  // Handle confirm delete
   const handleConfirmDelete = async () => {
     if (productToDelete) {
       try {
@@ -98,7 +90,6 @@ const AdminProducts = () => {
     }
   };
 
-  // Handle cancel delete
   const handleCancelDelete = () => {
     setModalOpen(false);
     setProductToDelete(null);
@@ -107,7 +98,10 @@ const AdminProducts = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+        </div>
       </div>
     );
   }
@@ -117,66 +111,59 @@ const AdminProducts = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
-          <p className="text-gray-600 mt-1">Manage your product inventory</p>
+          <h1 className="text-2xl font-bold text-white">Products Management</h1>
+          <p className="text-slate-400 mt-1">Manage your product inventory</p>
         </div>
         <Link
           to="/admin/products/create"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-md"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center gap-2 shadow-md"
         >
           <span className="text-xl">+</span> Add New Product
         </Link>
       </div>
 
       {/* Search and Results Info */}
-      <div className="bg-white rounded-lg shadow-md p-4">
+      <div className="bg-slate-800 rounded-xl shadow-lg p-5 border border-slate-700">
         <div className="flex flex-col md:flex-row justify-between gap-4">
-          <input
-            type="text"
-            placeholder="Search products by name or category..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <div className="text-sm text-gray-500 flex items-center">
-            Total: {filteredProducts.length} products
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search products by name or category..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2.5 pl-10 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <span className="absolute left-3 top-3 text-slate-400">🔍</span>
+          </div>
+          <div className="text-sm text-slate-400 flex items-center">
+            Total: <span className="text-white font-semibold ml-1 mr-1 ">{filteredProducts.length} </span> products
           </div>
         </div>
       </div>
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-slate-700">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-700">
+            <thead className="bg-slate-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Product</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Stock</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-slate-800 divide-y divide-slate-700">
               {currentProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                    <p className="text-4xl mb-2">📦</p>
+                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
+                    <div className="text-5xl mb-2">📦</div>
                     <p>No products found</p>
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm('')}
-                        className="mt-2 text-blue-600 hover:text-blue-700"
+                        className="mt-2 text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         Clear search
                       </button>
@@ -185,11 +172,10 @@ const AdminProducts = () => {
                 </tr>
               ) : (
                 currentProducts.map((product) => (
-                  <tr key={product._id} className="hover:bg-gray-50 transition-colors">
-                    {/* Product Image & Name */}
+                  <tr key={product._id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                        <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden border border-slate-700">
                           {product.images?.[0] ? (
                             <img
                               src={product.images[0]}
@@ -197,47 +183,37 @@ const AdminProducts = () => {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-gray-400 text-xl">📦</span>
+                            <span className="text-slate-500 text-xl">📦</span>
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{product.name?.substring(0, 30)}</p>
-                          <p className="text-xs text-gray-500 truncate max-w-xs">
+                          <p className="text-sm font-medium text-white">{product.name?.substring(0, 30)}</p>
+                          <p className="text-xs text-slate-400 truncate max-w-xs">
                             {product.description?.substring(0, 50)}...
                           </p>
                         </div>
                       </div>
                     </td>
-
-                    {/* Category */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
+                      <span className="px-2 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">
                         {product.category || 'Uncategorized'}
                       </span>
                     </td>
-
-                    {/* Price - Nepali Rupees */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-blue-600">
+                      <span className="text-sm font-semibold text-teal-400">
                         रू {product.price?.toLocaleString('en-IN') || '0'}
                       </span>
                     </td>
-
-                    {/* Stock */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-sm font-medium ${
-                        product.stock > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                       </span>
                     </td>
-
-                    {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/admin/products/${product._id}/edit`}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                          className="text-blue-400 hover:text-blue-300 transition-colors p-1"
                           title="Edit Product"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +222,7 @@ const AdminProducts = () => {
                         </Link>
                         <button
                           onClick={() => openDeleteModal(product)}
-                          className="text-red-600 hover:text-red-800 transition-colors p-1"
+                          className="text-red-400 hover:text-red-300 transition-colors p-1"
                           title="Delete Product"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,25 +242,23 @@ const AdminProducts = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-slate-400">
             Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length} products
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Previous Button */}
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
-              className={`px-3 py-2 rounded-lg transition-colors ${
+              className={`px-3 py-2 rounded-lg transition-all duration-300 ${
                 currentPage === 1
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  : 'bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white'
               }`}
             >
               Previous
             </button>
 
-            {/* Page Numbers */}
             <div className="flex gap-1">
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                 let pageNum;
@@ -302,10 +276,10 @@ const AdminProducts = () => {
                   <button
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
-                    className={`w-10 h-10 rounded-lg transition-colors ${
+                    className={`w-10 h-10 rounded-lg transition-all duration-300 ${
                       currentPage === pageNum
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-md'
+                        : 'bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white'
                     }`}
                   >
                     {pageNum}
@@ -315,10 +289,10 @@ const AdminProducts = () => {
               
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <>
-                  <span className="px-2 py-2 text-gray-500">...</span>
+                  <span className="px-2 py-2 text-slate-500">...</span>
                   <button
                     onClick={() => goToPage(totalPages)}
-                    className="w-10 h-10 rounded-lg transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    className="w-10 h-10 rounded-lg transition-all duration-300 bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white"
                   >
                     {totalPages}
                   </button>
@@ -326,14 +300,13 @@ const AdminProducts = () => {
               )}
             </div>
 
-            {/* Next Button */}
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className={`px-3 py-2 rounded-lg transition-colors ${
+              className={`px-3 py-2 rounded-lg transition-all duration-300 ${
                 currentPage === totalPages
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  : 'bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white'
               }`}
             >
               Next

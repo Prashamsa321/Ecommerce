@@ -8,30 +8,34 @@ const generateToken = (id) => {
   })
 }
 
+// The register function to accept pre-hashed password from OTP verification
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password } = req.body; // password is already hashed from OTP
 
-    const userExists = await User.findOne({ email })
+    // Check if user already exists (double check)
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
         success: false,
         message: 'User already exists'
-      })
+      });
     }
 
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-
+    // Create user with pre-hashed password
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password, // Already hashed password
       role: 'user'
-    })
+    });
 
     if (user) {
-      const token = generateToken(user._id)
+      // Delete OTP record after successful registration
+      const OTP = (await import('../models/OTP.js')).default;
+      await OTP.deleteMany({ email });
+
+      const token = generateToken(user._id);
       res.status(201).json({
         success: true,
         token,
@@ -41,22 +45,21 @@ export const register = async (req, res) => {
           email: user.email,
           role: user.role
         }
-      })
+      });
     } else {
       res.status(400).json({
         success: false,
         message: 'Invalid user data'
-      })
+      });
     }
   } catch (error) {
-    console.error('Register error:', error)
+    console.error('Register error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'
-    })
+    });
   }
-}
-
+};
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body
@@ -65,7 +68,7 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid email '
       })
     }
 
@@ -73,7 +76,7 @@ export const login = async (req, res) => {
     if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid password'
       })
     }
 
@@ -265,6 +268,74 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating profile',
+      error: error.message
+    });
+  }
+};
+
+// Change password
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
+    
+    console.log('Change password request received for user:', userId);
+    console.log('Request body:', { currentPassword: '***', newPassword: '***' });
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters'
+      });
+    }
+
+    // Dynamically import User model to avoid circular dependencies
+    const User = (await import('../models/User.js')).default;
+    const bcrypt = await import('bcrypt');
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    console.log('Password changed successfully for user:', userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error changing password',
       error: error.message
     });
   }

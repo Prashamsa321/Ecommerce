@@ -24,7 +24,6 @@ const AdminDashboard = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      // Fetch all data in parallel for better performance
       const [productsRes, usersRes, ordersRes] = await Promise.all([
         axios.get('http://localhost:5000/api/products/getproduct', {
           headers: { Authorization: `Bearer ${token}` }
@@ -34,18 +33,13 @@ const AdminDashboard = () => {
         }),
         axios.get('http://localhost:5000/api/orders', {
           headers: { Authorization: `Bearer ${token}` }
-        }).catch(() => ({ data: { orders: [] } })) // If orders endpoint doesn't exist yet
+        }).catch(() => ({ data: { orders: [] } }))
       ]);
 
-      // Calculate total products
       const products = productsRes.data.products || [];
       const totalProducts = products.length;
-
-      // Calculate total users
       const users = usersRes.data.users || [];
       const totalUsers = users.length;
-
-      // Calculate total orders and revenue
       const orders = ordersRes.data.orders || [];
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
@@ -69,7 +63,7 @@ const AdminDashboard = () => {
       title: 'Total Products', 
       value: stats.totalProducts, 
       icon: '📦', 
-      color: 'bg-blue-500', 
+      color: 'from-blue-600 to-blue-700', 
       link: '/admin/products',
       prefix: ''
     },
@@ -77,7 +71,7 @@ const AdminDashboard = () => {
       title: 'Total Orders', 
       value: stats.totalOrders, 
       icon: '🛒', 
-      color: 'bg-green-500', 
+      color: 'from-teal-500 to-teal-600', 
       link: '/admin/orders',
       prefix: ''
     },
@@ -85,7 +79,7 @@ const AdminDashboard = () => {
       title: 'Total Users', 
       value: stats.totalUsers, 
       icon: '👥', 
-      color: 'bg-purple-500', 
+      color: 'from-purple-600 to-purple-700', 
       link: '/admin/users',
       prefix: ''
     },
@@ -93,26 +87,36 @@ const AdminDashboard = () => {
       title: 'Total Revenue', 
       value: stats.totalRevenue, 
       icon: '💰', 
-      color: 'bg-yellow-500', 
+      color: 'from-amber-500 to-amber-600', 
       link: '/admin/analytics',
-      prefix: '$'
+      prefix: 'रू '
     },
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section - Blue theme */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-        <h1 className="text-2xl font-bold text-gray-800">Welcome back, {user?.name}!</h1>
-        <p className="text-gray-600 mt-1">Here's what's happening with your store today.</p>
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 shadow-xl">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-teal-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
+            👋
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Welcome back, {user?.name}!</h1>
+            <p className="text-slate-400 mt-1">Here's what's happening with your store today.</p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -121,21 +125,26 @@ const AdminDashboard = () => {
           <Link
             key={index}
             to={stat.link}
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border-t-4 border-blue-500"
+            className="group bg-slate-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-700"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">
-                  {stat.prefix}{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
-                </p>
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm font-medium">{stat.title}</p>
+                  <p className="text-3xl font-bold text-white mt-2">
+                    {stat.prefix}{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                  </p>
+                </div>
+                <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                  {stat.icon}
+                </div>
               </div>
-              <div className={`${stat.color} w-12 h-12 rounded-lg flex items-center justify-center text-2xl shadow-md`}>
-                {stat.icon}
+              <div className="mt-4 text-sm text-blue-400 font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                View Details 
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-            </div>
-            <div className="mt-4 text-sm text-blue-600 font-medium">
-              View Details →
             </div>
           </Link>
         ))}
@@ -143,35 +152,46 @@ const AdminDashboard = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="font-semibold text-gray-800 mb-4">Quick Actions</h3>
+        <div className="bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
+          <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="text-xl">⚡</span>
+            Quick Actions
+          </h3>
           <div className="space-y-3">
             <Link
               to="/admin/products/create"
-              className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="block w-full text-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-medium shadow-md"
             >
               + Add New Product
             </Link>
             <Link
               to="/admin/orders"
-              className="block w-full text-center border border-blue-300 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+              className="block w-full text-center border border-teal-500 text-teal-400 px-4 py-2.5 rounded-lg hover:bg-teal-500/10 transition-all duration-300 font-medium"
             >
               View All Orders
             </Link>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="font-semibold text-gray-800 mb-4">Admin Info</h3>
+        <div className="bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
+          <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="text-xl">ℹ️</span>
+            Admin Info
+          </h3>
           <div className="space-y-2 text-sm">
-            <p><strong className="text-gray-700">Name:</strong> <span className="text-gray-600">{user?.name}</span></p>
-            <p><strong className="text-gray-700">Email:</strong> <span className="text-gray-600">{user?.email}</span></p>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 w-16">Name:</span>
+              <span className="text-white font-medium">{user?.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 w-16">Email:</span>
+              <span className="text-slate-300">{user?.email}</span>
+            </div>
           </div>
           
-          {/* Refresh Button */}
           <button
             onClick={fetchDashboardData}
-            className="mt-4 w-full text-center text-sm text-blue-600 hover:text-blue-700 transition-colors"
+            className="mt-4 w-full text-center text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center justify-center gap-1"
           >
             🔄 Refresh Data
           </button>
