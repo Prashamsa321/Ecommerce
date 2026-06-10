@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -12,6 +12,7 @@ const CartPage = () => {
   
   const [modalOpen, setModalOpen] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
+  const [updatingItemId, setUpdatingItemId] = useState(null);
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -27,16 +28,54 @@ const CartPage = () => {
 
   const handleConfirmRemove = async () => {
     if (itemToRemove) {
-      await removeFromCart(itemToRemove.productId || itemToRemove._id);
-      success(`${itemToRemove.name} removed from cart`);
-      setModalOpen(false);
-      setItemToRemove(null);
+      setUpdatingItemId(itemToRemove.productId || itemToRemove._id);
+      try {
+        await removeFromCart(itemToRemove.productId || itemToRemove._id);
+        success(`${itemToRemove.name} removed from cart`);
+        setModalOpen(false);
+        setItemToRemove(null);
+      } catch (err) {
+        toastError('Failed to remove item');
+      } finally {
+        setUpdatingItemId(null);
+      }
     }
   };
 
   const handleCancelRemove = () => {
     setModalOpen(false);
     setItemToRemove(null);
+  };
+
+  const handleUpdateQuantity = useCallback(async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    setUpdatingItemId(itemId);
+    try {
+      await updateQuantity(itemId, newQuantity);
+    } catch (err) {
+      toastError('Failed to update quantity');
+    } finally {
+      setUpdatingItemId(null);
+    }
+  }, [updateQuantity, toastError]);
+
+  const handleDecrease = (itemId, currentQuantity) => {
+    if (currentQuantity > 1) {
+      handleUpdateQuantity(itemId, currentQuantity - 1);
+    } else {
+      // If quantity is 1, prompt to remove
+      const item = items.find(i => (i.productId || i._id) === itemId);
+      if (item) {
+        handleRemoveClick(item);
+      }
+    }
+  };
+
+  const handleIncrease = (itemId, currentQuantity, maxStock = 999) => {
+    if (currentQuantity < maxStock) {
+      handleUpdateQuantity(itemId, currentQuantity + 1);
+    }
   };
 
   useEffect(() => {
@@ -47,15 +86,17 @@ const CartPage = () => {
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
+    
   }, [modalOpen]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0A2540] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#FF6200] border-t-transparent"></div>
-      </div>
-    );
-  }
+  //if loading, show spinner
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-[#0A2540] flex items-center justify-center">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#FF6200] border-t-transparent"></div>
+  //     </div>
+  //   );
+  // }
 
   if (user?.role === 'admin') return null;
 
@@ -90,59 +131,76 @@ const CartPage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
           <div className="lg:w-2/3 space-y-4">
-            {items.map((item) => (
-              <div 
-                key={item.productId || item._id} 
-                className="bg-[#111827] rounded-2xl p-6 border border-[#1E3A8A] hover:border-[#FF6200] transition-all duration-300"
-              >
-                <div className="flex items-center gap-6">
-                  {/* Product Image */}
-                  <div className="w-24 h-24 bg-[#1E3A8A] rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-3xl">📦</span>
-                    )}
-                  </div>
-                  
-                  {/* Product Info */}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white text-lg">{item.name || 'Product'}</h3>
-                    <p className="text-gray-300 text-sm mt-1">${(item.price || 0).toFixed(2)} each</p>
+            {items.map((item) => {
+              const itemId = item.productId || item._id;
+              const isUpdating = updatingItemId === itemId;
+              
+              return (
+                <div 
+                  key={itemId} 
+                  className="bg-[#111827] rounded-2xl p-6 border border-[#1E3A8A] hover:border-[#FF6200] transition-all duration-300"
+                >
+                  <div className="flex items-center gap-6">
+                    {/* Product Image */}
+                    <div className="w-24 h-24 bg-[#1E3A8A] rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-3xl">📦</span>
+                      )}
+                    </div>
                     
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-3 mt-4">
+                    {/* Product Info */}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-white text-lg">{item.name || 'Product'}</h3>
+                      <p className="text-gray-300 text-sm mt-1">रु{(item.price || 0).toFixed(2)} each</p>
+                      
+                      {/* Quantity Controls - No page refresh */}
+                      <div className="flex items-center gap-3 mt-4">
+                        <button
+                          onClick={() => handleDecrease(itemId, item.quantity || 1)}
+                          disabled={isUpdating}
+                          className="w-8 h-8 rounded-full bg-[#1E3A8A] text-white hover:bg-[#FF6200] transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center text-white font-medium">
+                          {isUpdating ? (
+                            <svg className="animate-spin h-4 w-4 mx-auto" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                          ) : (
+                            item.quantity || 0
+                          )}
+                        </span>
+                        <button
+                          onClick={() => handleIncrease(itemId, item.quantity || 1, 99)}
+                          disabled={isUpdating}
+                          className="w-8 h-8 rounded-full bg-[#1E3A8A] text-white hover:bg-[#FF6200] transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Price & Remove */}
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-white">
+                        रु{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                      </p>
                       <button
-                        onClick={() => updateQuantity(item.productId || item._id, Math.max(1, (item.quantity || 1) - 1))}
-                        className="w-8 h-8 rounded-full bg-[#1E3A8A] text-white hover:bg-[#FF6200] transition-all flex items-center justify-center"
+                        onClick={() => handleRemoveClick(item)}
+                        disabled={isUpdating}
+                        className="text-[#FF3B30] hover:text-[#FF2D55] transition-colors mt-2 text-sm disabled:opacity-50"
                       >
-                        -
-                      </button>
-                      <span className="w-8 text-center text-white font-medium">{item.quantity || 0}</span>
-                      <button
-                        onClick={() => updateQuantity(item.productId || item._id, (item.quantity || 1) + 1)}
-                        className="w-8 h-8 rounded-full bg-[#1E3A8A] text-white hover:bg-[#FF6200] transition-all flex items-center justify-center"
-                      >
-                        +
+                        Remove
                       </button>
                     </div>
                   </div>
-                  
-                  {/* Price & Remove */}
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-white">
-                      ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
-                    </p>
-                    <button
-                      onClick={() => handleRemoveClick(item)}
-                      className="text-[#FF3B30] hover:text-[#FF2D55] transition-colors mt-2 text-sm"
-                    >
-                      Remove
-                    </button>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           
           {/* Order Summary */}
@@ -153,7 +211,7 @@ const CartPage = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-gray-300">
                   <span>Subtotal ({items.reduce((sum, item) => sum + (item.quantity || 0), 0)} items)</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>रु{getCartTotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-300">
                   <span>Shipping</span>
@@ -162,7 +220,7 @@ const CartPage = () => {
                 <div className="border-t border-[#1E3A8A] pt-3">
                   <div className="flex justify-between text-lg font-bold text-white">
                     <span>Total</span>
-                    <span>${getCartTotal().toFixed(2)}</span>
+                    <span>रु{getCartTotal().toFixed(2)}</span>
                   </div>
                 </div>
               </div>

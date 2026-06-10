@@ -35,7 +35,7 @@ const CartItem = ({ item }) => {
       
       <div className="flex-1">
         <h3 className="font-semibold text-gray-800">{product.name}</h3>
-        <p className="text-gray-600">${product.price?.toFixed(2) || '0.00'}</p>
+        <p className="text-gray-600">रु{product.price?.toFixed(2) || '0.00'}</p>
       </div>
 
       <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ const CartItem = ({ item }) => {
       </div>
 
       <div className="w-24 text-right font-semibold">
-        ${((product.price || 0) * (item.qty || 0)).toFixed(2)}
+        रु{((product.price || 0) * (item.qty || 0)).toFixed(2)}
       </div>
 
       <button

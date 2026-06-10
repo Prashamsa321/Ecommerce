@@ -1,28 +1,46 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useToast } from '../context/ToastContext.jsx';
 import axios from 'axios';
 
-const UserProfile = () => {
-  const { user, token } = useAuth();
+const ProfilePage = () => {
+  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
   const { success, error } = useToast();
+  
+  // ALL hooks must be at the top, before any conditional returns
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || ''
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
   });
-  
-  // Password change state
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Debug logging
+  console.log('ProfilePage - authLoading:', authLoading);
+  console.log('ProfilePage - isAuthenticated:', isAuthenticated);
+  console.log('ProfilePage - user:', user);
+  console.log('ProfilePage - token:', token);
+
+  // Update formData when user data is available
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || ''
+      });
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,7 +74,11 @@ const UserProfile = () => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     
-    // Validation
+    if (!token) {
+      error('Please login again to change password');
+      return;
+    }
+    
     if (!passwordData.currentPassword) {
       error('Please enter your current password');
       return;
@@ -73,10 +95,10 @@ const UserProfile = () => {
       error('New passwords do not match');
       return;
     }
-
+  
     setPasswordLoading(true);
     try {
-      await axios.post(
+      const response = await axios.put(
         'http://localhost:5000/api/auth/change-password',
         {
           currentPassword: passwordData.currentPassword,
@@ -84,19 +106,61 @@ const UserProfile = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      success('Password changed successfully!');
-      setShowChangePassword(false);
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
+      
+      if (response.data.success) {
+        success(response.data.message || 'Password changed successfully!');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        setShowChangePassword(false);
+      }
     } catch (err) {
-      error(err.response?.data?.message || 'Failed to change password');
+      const errorMessage = err.response?.data?.message || 'Failed to change password';
+      error(errorMessage);
+      
+      if (err.response?.status === 401) {
+        error('Session expired. Please login again.');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      }
     } finally {
       setPasswordLoading(false);
     }
   };
+
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <div className="max-w-4xl mx-auto py-8 flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6200] mx-auto"></div>
+          <p className="text-white mt-4">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, show login message
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="max-w-4xl mx-auto py-8">
+        <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl shadow-xl border border-[#1E3A8A] p-8 text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Not Logged In</h2>
+          <p className="text-gray-400 mb-6">Please login to view your profile</p>
+          <a 
+            href="/login" 
+            className="inline-block bg-gradient-to-r from-[#FF6200] to-[#FF3D00] text-white px-6 py-3 rounded-xl font-semibold hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300"
+          >
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -115,6 +179,7 @@ const UserProfile = () => {
 
       {/* Profile Card */}
       <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl shadow-xl border border-[#1E3A8A] overflow-hidden">
+        
         {/* Card Header */}
         <div className="bg-gradient-to-r from-[#0A2540] to-[#1E3A8A] px-6 py-4 border-b border-[#1E3A8A]">
           <div className="flex justify-between items-center">
@@ -426,4 +491,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default ProfilePage;

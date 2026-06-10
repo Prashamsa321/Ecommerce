@@ -9,6 +9,8 @@ import categoryRoutes from './routes/category.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import otpRoutes from './routes/otp.routes.js';
 import passwordRoutes from './routes/password.routes.js';
+import orderRoutes from './routes/order.routes.js';
+
 
 
 
@@ -32,6 +34,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/contact', contactRoutes)
 app.use('/api/otp', otpRoutes);
 app.use('/api/password', passwordRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

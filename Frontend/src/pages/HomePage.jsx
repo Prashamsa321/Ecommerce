@@ -172,7 +172,7 @@ const HomePage = () => {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { icon: '🚚', title: 'Free Shipping', desc: 'On orders over $100' },
+              { icon: '🚚', title: 'Free Shipping', desc: 'On orders over रु100' },
               { icon: '🔄', title: '30-Day Returns', desc: 'Hassle-free returns' },
               { icon: '💳', title: 'Secure Payment', desc: '100% secure transactions' },
               { icon: '⏰', title: '24/7 Support', desc: 'Dedicated customer service' }

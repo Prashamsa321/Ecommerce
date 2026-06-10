@@ -19,12 +19,11 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Load user from localStorage directly (no API call needed)
+  // Load user from localStorage directly
   useEffect(() => {
     const loadUser = () => {
       const storedToken = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
-      
       
       if (storedToken && storedUser) {
         try {
@@ -102,23 +101,19 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Logout function
-  const logout = async () => {
-    try {
-      // Try to call logout endpoint if it exists
-      await axios.post(`${API_URL}/auth/logout`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => {}) // Ignore error if endpoint doesn't exist
-    } catch (error) {
-      console.error('Logout API error:', error)
-    } finally {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      setToken(null)
-      setUser(null)
-      setIsAuthenticated(false)
-      delete axios.defaults.headers.common['Authorization']
-    }
+  // Logout function - FIXED (removed API call)
+  const logout = () => {
+    // Clear local storage
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    
+    // Clear state
+    setToken(null)
+    setUser(null)
+    setIsAuthenticated(false)
+    
+    // Remove axios default header
+    delete axios.defaults.headers.common['Authorization']
   }
 
   const value = {

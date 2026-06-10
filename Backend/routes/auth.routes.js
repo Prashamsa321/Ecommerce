@@ -20,29 +20,18 @@ router.post('/login', login);
 // Protected routes (require authentication)
 router.get('/me', protect, getMe);
 router.put('/updateprofile', protect, updateProfile);
-router.put('/change-password', protect, changePassword);  
+router.put('/change-password', protect, changePassword);  // Change password endpoint
 
 // Admin only routes
 router.get('/users', protect, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Admin only.'
-      });
+      return res.status(403).json({ success: false, message: 'Admin only' });
     }
     const users = await User.find({}).select('-password');
-    res.status(200).json({
-      success: true,
-      users
-    });
+    res.status(200).json({ success: true, users });
   } catch (error) {
-    console.error('Get users error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching users',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 

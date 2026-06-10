@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/layout/Navbar';
 import AdminLayout from './components/layout/AdminLayout';
@@ -11,7 +11,7 @@ import Register from './pages/Register';
 import ProfilePage from './pages/ProfilePage';
 import ContactPage from './pages/ContactPage';
 import ForgotPassword from './pages/ForgotPassword';
-
+import AboutPage from './pages/AboutPage';
 
 
 // Admin pages
@@ -23,6 +23,8 @@ import AdminUsers from './pages/admin/AdminUsers';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import CreateProductPage from './pages/admin/CreateProductPage';
 import AdminProfile from './pages/admin/AdminProfile';
+import AdminSettings from './pages/admin/AdminSettings';
+import Footer from './components/layout/Footer';
 
 
 function App() {
@@ -31,8 +33,8 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   // If admin is trying to access non-admin routes, redirect to admin panel
-  if (user?.role === 'admin' && !isAdminRoute && isAuthenticated && 
-      location.pathname !== '/login' && location.pathname !== '/register') {
+  if (user?.role === 'admin' && !isAdminRoute && isAuthenticated &&
+    location.pathname !== '/login' && location.pathname !== '/register') {
     return <Navigate to="/admin" replace />;
   }
 
@@ -40,7 +42,7 @@ function App() {
     <div>
       {/* Only show Navbar if NOT on admin routes */}
       {!isAdminRoute && <Navbar />}
-      
+
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
@@ -50,12 +52,15 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/about" element={<AboutPage />} />
 
 
-  
           <Route path="/profile" element={<ProfilePage />} />
-  
         
+        {/* Protected Route - User must be logged in */}
+        {/* <Route element={<PrivateRoute adminOnly={false} />}>
+        </Route> */}
+
         {/* Admin Routes - For admin only */}
         <Route path="/admin" element={
           <PrivateRoute adminOnly={true}>
@@ -71,10 +76,11 @@ function App() {
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="contacts" element={<AdminContacts />} />
-
-
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
+
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }

@@ -105,7 +105,7 @@ function AdminLayout() {
         ref={sidebarRef}
         className={`sidebar-container ${isSidebarOpen ? "w-64" : "w-20"} bg-gradient-to-b from-slate-800 to-slate-900 text-white transition-all duration-300 shadow-2xl fixed h-full z-20 border-r border-slate-700 flex flex-col`}
       >
-        {/* Sidebar Header - Fixed at top */}
+        {/* Sidebar Header */}
         <div className="flex-shrink-0 p-4 border-b border-slate-700 flex items-center justify-between">
           {isSidebarOpen && (
             <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ function AdminLayout() {
           </button>
         </div>
 
-        {/* Navigation Container - Scrollable */}
+        {/* Navigation Container */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <nav className="p-4 space-y-2">
             {navItems.map((item) => {
@@ -137,10 +137,9 @@ function AdminLayout() {
                 <div key={item.name} className="w-full">
                   {item.dropdown ? (
                     <div className="w-full">
-                      {/* Dropdown Button */}
                       <button
                         onClick={() => toggleDropdown(item.name)}
-                        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+                        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                           isAnyDropdownActive
                             ? 'bg-blue-600 text-white shadow-lg'
                             : 'text-slate-300 hover:bg-slate-700 hover:text-white'
@@ -162,7 +161,6 @@ function AdminLayout() {
                         )}
                       </button>
 
-                      {/* Dropdown Items - Proper spacing */}
                       {isSidebarOpen && (isDropdownOpen || isAnyDropdownActive) && (
                         <div className="ml-4 mt-2 space-y-1 border-l-2 border-blue-500 pl-3">
                           {item.dropdownItems.map((subItem) => (
@@ -182,7 +180,6 @@ function AdminLayout() {
                         </div>
                       )}
 
-                      {/* Tooltip for collapsed sidebar */}
                       {!isSidebarOpen && (
                         <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none border border-slate-700 shadow-lg">
                           {item.name}
@@ -215,7 +212,7 @@ function AdminLayout() {
           </nav>
         </div>
 
-        {/* Sidebar Footer - Fixed at bottom */}
+        {/* Sidebar Footer */}
         <div className="flex-shrink-0 w-full p-4 border-t border-slate-700 bg-gradient-to-t from-slate-800 to-transparent">
           <button
             onClick={handleLogout}
@@ -227,15 +224,17 @@ function AdminLayout() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Fixed margin */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
         {/* Top Navbar */}
         <header className="bg-slate-800 shadow-md px-6 py-4 flex justify-between items-center sticky top-0 z-10 border-b border-slate-700">
           <div className="flex items-center gap-2">
-            {/* Optional: Add breadcrumb or welcome message here */}
+            {/* Welcome message or breadcrumb can go here */}
           </div>
 
           <div className="flex items-center gap-2">
+        
+
             {/* User Profile Dropdown */}
             <div className="relative">
               <button
