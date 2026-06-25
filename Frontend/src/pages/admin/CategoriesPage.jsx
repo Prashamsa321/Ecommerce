@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { categoryService } from '../../services/categoryService';
+import { productService } from '../../services/productService';
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
@@ -23,14 +24,33 @@ const CategoriesPage = () => {
   ];
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategoriesWithCounts();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategoriesWithCounts = async () => {
     try {
       setLoading(true);
-      const data = await categoryService.getAllCategories();
-      setCategories(data);
+      
+      // Fetch all categories
+      const categoriesData = await categoryService.getAllCategories();
+      
+      // Fetch all products to count per category
+      const productsData = await productService.getAllProducts();
+      const allProducts = Array.isArray(productsData) ? productsData : [];
+      
+      // Count products per category
+      const categoriesWithCounts = categoriesData.map(category => {
+        const productCount = allProducts.filter(
+          product => product.category === category.name
+        ).length;
+        
+        return {
+          ...category,
+          productCount: productCount
+        };
+      });
+      
+      setCategories(categoriesWithCounts);
     } catch (err) {
       console.error('Fetch categories error:', err);
       error('Failed to load categories');
@@ -53,7 +73,7 @@ const CategoriesPage = () => {
       
       success('Category added successfully');
       setNewCategoryName('');
-      fetchCategories();
+      fetchCategoriesWithCounts();
     } catch (err) {
       error(err.response?.data?.message || 'Failed to add category');
     }
@@ -79,7 +99,7 @@ const CategoriesPage = () => {
       
       success('Category updated successfully');
       setEditingCategory(null);
-      fetchCategories();
+      fetchCategoriesWithCounts();
     } catch (err) {
       error(err.response?.data?.message || 'Failed to update category');
     }
@@ -103,7 +123,7 @@ const CategoriesPage = () => {
         success('Category deleted successfully');
         setDeleteModalOpen(false);
         setCategoryToDelete(null);
-        fetchCategories();
+        fetchCategoriesWithCounts();
       } catch (err) {
         error(err.response?.data?.message || 'Failed to delete category');
       }

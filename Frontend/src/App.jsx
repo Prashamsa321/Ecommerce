@@ -32,11 +32,17 @@ function App() {
   const { user, isAuthenticated } = useAuth();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  // If admin is trying to access non-admin routes, redirect to admin panel
-  if (user?.role === 'admin' && !isAdminRoute && isAuthenticated &&
-    location.pathname !== '/login' && location.pathname !== '/register') {
-    return <Navigate to="/admin" replace />;
-  }
+  if (user?.role === 'admin' && !isAdminRoute && isAuthenticated && 
+    location.pathname !== '/login' && 
+    location.pathname !== '/register' &&
+    location.pathname !== '/' &&  // Allow home page
+    location.pathname !== '/products' &&  // Allow products page
+    location.pathname !== '/about' &&  // Allow about page
+    location.pathname !== '/contact' &&  // Allow contact page
+    !location.pathname.startsWith('/product') // Allow product detail pages
+   ) {
+  return <Navigate to="/admin" replace />;
+}
 
   return (
     <div>

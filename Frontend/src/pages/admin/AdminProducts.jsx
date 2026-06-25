@@ -1,71 +1,85 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { productService } from '../../services/productService';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 
 const AdminProducts = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { success, error } = useToast();
   
-  const [currentPage, setCurrentPage] = useState(1);
+  // Get page from URL params
+  const currentPage = parseInt(searchParams.get('page')) || 1;
   const [itemsPerPage] = useState(10);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // Debounce search
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const fetchProducts = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch products with pagination
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await productService.getAllProducts();
-      const productsArray = Array.isArray(data) ? data : [];
-      setProducts(productsArray);
-      setTotalPages(Math.ceil(productsArray.length / itemsPerPage));
-      setCurrentPage(1);
+      const data = await productService.getAllProducts(
+        currentPage,
+        itemsPerPage,
+        debouncedSearch
+      );
+      
+      setProducts(data.products || []);
+      setTotalProducts(data.totalProducts || 0);
+      setTotalPages(data.totalPages || 1);
     } catch (err) {
       error('Failed to fetch products');
       setProducts([]);
+      setTotalProducts(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  };
-
-  const filteredProducts = products.filter(product =>
-    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  }, [currentPage, itemsPerPage, debouncedSearch, error]);
 
   useEffect(() => {
-    setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
-    setCurrentPage(1);
-  }, [searchTerm, filteredProducts.length]);
+    fetchProducts();
+  }, [fetchProducts]);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setSearchParams({ page: 1 });
+    }
+  }, [debouncedSearch]);
 
   const goToPage = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    setSearchParams({ page: pageNumber });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      setSearchParams({ page: currentPage + 1 });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setSearchParams({ page: currentPage - 1 });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -130,13 +144,19 @@ const AdminProducts = () => {
               type="text"
               placeholder="Search products by name or category..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                // Reset to page 1 when searching
+                if (currentPage !== 1) {
+                  setSearchParams({ page: 1 });
+                }
+              }}
               className="w-full px-4 py-2.5 pl-10 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <span className="absolute left-3 top-3 text-slate-400">🔍</span>
           </div>
           <div className="text-sm text-slate-400 flex items-center">
-            Total: <span className="text-white font-semibold ml-1 mr-1 ">{filteredProducts.length} </span> products
+            Total: <span className="text-white font-semibold ml-1 mr-1">{totalProducts}</span> products
           </div>
         </div>
       </div>
@@ -155,7 +175,7 @@ const AdminProducts = () => {
               </tr>
             </thead>
             <tbody className="bg-slate-800 divide-y divide-slate-700">
-              {currentProducts.length === 0 ? (
+              {products.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
                     <div className="text-5xl mb-2">📦</div>
@@ -171,7 +191,7 @@ const AdminProducts = () => {
                   </td>
                 </tr>
               ) : (
-                currentProducts.map((product) => (
+                products.map((product) => (
                   <tr key={product._id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -239,11 +259,11 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination with Page Info */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
           <div className="text-sm text-slate-400">
-            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length} products
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalProducts)} of {totalProducts} products
           </div>
           
           <div className="flex items-center gap-2">

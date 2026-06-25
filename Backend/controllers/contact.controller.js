@@ -1,4 +1,5 @@
 import Contact from '../models/Contact.js';
+import { sendAdminContactNotification, sendUserContactConfirmation } from '../services/emailService.js';
 
 // Submit contact form (public)
 export const submitContact = async (req, res) => {
@@ -27,6 +28,7 @@ export const submitContact = async (req, res) => {
       });
     }
 
+    // Save to database
     const contact = await Contact.create({
       name,
       email,
@@ -35,9 +37,23 @@ export const submitContact = async (req, res) => {
       status: 'pending'
     });
 
+    // Send email notifications (non-blocking)
+    try {
+      // Send notification to admin
+      await sendAdminContactNotification({ name, email, subject, message });
+      
+      // Send confirmation to user
+      await sendUserContactConfirmation({ name, email, subject, message });
+      
+      console.log('Email notifications sent successfully');
+    } catch (emailError) {
+      console.error('Failed to send email notifications:', emailError);
+      // Don't fail the request if email fails
+    }
+
     res.status(201).json({
       success: true,
-      message: 'Message sent successfully!',
+      message: 'Message sent successfully! We\'ll get back to you soon.',
       data: contact
     });
   } catch (error) {

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { contactService } from '../services/contactService';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 function ContactPage() {
+  const { user } = useAuth();
   const { success, error: toastError } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -14,6 +16,21 @@ function ContactPage() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin';
+
+  // Pre-fill form with admin data if admin is viewing
+  React.useEffect(() => {
+    if (isAdmin && user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        subject: '',
+        message: '',
+      });
+    }
+  }, [isAdmin, user]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -58,6 +75,12 @@ function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent admin from submitting
+    if (isAdmin) {
+      toastError('Admins cannot send contact messages. Please use the admin panel.');
+      return;
+    }
     
     if (!validateForm()) return;
 
@@ -109,6 +132,19 @@ function ContactPage() {
           <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto">
             Have questions? We'd love to hear from you. Our team is here to help.
           </p>
+          
+          {/* Admin Notice Banner */}
+          {isAdmin && (
+            <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 max-w-2xl mx-auto">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">👑</span>
+                <div className="text-left">
+                  <p className="text-amber-400 font-semibold">Admin View Mode</p>
+                  <p className="text-amber-400/70 text-sm">You are viewing as admin. Contact form submissions are disabled for admin accounts.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -116,7 +152,11 @@ function ContactPage() {
           <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-[#1E3A8A] shadow-xl">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-white mb-2">Send us a Message</h2>
-              <p className="text-gray-400 text-sm">Fill out the form below and we'll get back to you soon.</p>
+              <p className="text-gray-400 text-sm">
+                {isAdmin 
+                  ? 'Admins can view the form but cannot submit messages.' 
+                  : 'Fill out the form below and we\'ll get back to you soon.'}
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -136,6 +176,7 @@ function ContactPage() {
                     onBlur={() => setFocusedField(null)}
                     placeholder="John Doe"
                     className={getInputClassName('name')}
+                    disabled={isAdmin}
                   />
                   {errors.name && (
                     <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
@@ -158,6 +199,7 @@ function ContactPage() {
                     onBlur={() => setFocusedField(null)}
                     placeholder="john@example.com"
                     className={getInputClassName('email')}
+                    disabled={isAdmin}
                   />
                   {errors.email && (
                     <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
@@ -181,6 +223,7 @@ function ContactPage() {
                   onBlur={() => setFocusedField(null)}
                   placeholder="What's this about?"
                   className={getInputClassName('subject')}
+                  disabled={isAdmin}
                 />
                 {errors.subject && (
                   <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
@@ -203,6 +246,7 @@ function ContactPage() {
                   placeholder="Your message here... (minimum 10 characters)"
                   rows="5"
                   className={`${getInputClassName('message')} resize-none`}
+                  disabled={isAdmin}
                 />
                 {errors.message && (
                   <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
@@ -211,11 +255,13 @@ function ContactPage() {
                 )}
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button - Disabled for admin */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-[#FF6200] to-[#FF3D00] hover:from-[#FF3D00] hover:to-[#FF6200] disabled:bg-[#1E3A8A] disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                disabled={isSubmitting || isAdmin}
+                className={`w-full bg-gradient-to-r from-[#FF6200] to-[#FF3D00] hover:from-[#FF3D00] hover:to-[#FF6200] disabled:bg-[#1E3A8A] disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 ${
+                  isAdmin ? 'opacity-70' : ''
+                }`}
               >
                 {isSubmitting ? (
                   <>
@@ -224,6 +270,13 @@ function ContactPage() {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Sending...
+                  </>
+                ) : isAdmin ? (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Admins Cannot Send Messages
                   </>
                 ) : (
                   <>
@@ -234,6 +287,13 @@ function ContactPage() {
                   </>
                 )}
               </button>
+
+              {/* Admin Notice below button */}
+              {isAdmin && (
+                <p className="text-center text-amber-400/70 text-xs mt-2">
+                  🔒 Admins cannot submit contact forms. Please use the admin panel for communications.
+                </p>
+              )}
             </form>
           </div>
 

@@ -42,7 +42,22 @@ const ProductsPage = () => {
     try {
       setLoading(true);
       const data = await productService.getAllProducts();
-      const productsArray = Array.isArray(data) ? data : [];
+      console.log('Raw data from API:', data);
+      
+      // Handle different response formats
+      let productsArray = [];
+      if (Array.isArray(data)) {
+        productsArray = data;
+      } else if (data && data.products && Array.isArray(data.products)) {
+        productsArray = data.products;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        productsArray = data.data;
+      } else {
+        console.error('Unexpected data format:', data);
+        productsArray = [];
+      }
+      
+      console.log('Products array after parsing:', productsArray);
       setProducts(productsArray);
 
       // Extract unique categories
@@ -101,6 +116,9 @@ const ProductsPage = () => {
 
   const isAdmin = user?.role === 'admin';
 
+  // Debug: Log current products
+  console.log('Current products to render:', currentProducts);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A2540] flex items-center justify-center">
@@ -111,7 +129,7 @@ const ProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0A2540] py-8">
-      <div className="container mx-auto ">
+      <div className="container mx-auto px-4">
         {/* Admin Notice Banner */}
         {isAdmin && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -200,7 +218,7 @@ const ProductsPage = () => {
           <div className="bg-gradient-to-r from-[#FF6200]/20 to-[#FF3D00]/20 rounded-2xl p-4 mb-6 border border-[#FF6200]/30">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
-                <span className="text-3xl"></span>
+                <span className="text-3xl">📂</span>
                 <div>
                   <p className="text-white font-semibold">Showing products in: {selectedCategory}</p>
                   <p className="text-gray-300 text-sm">{filteredProducts.length} products found</p>
@@ -215,6 +233,11 @@ const ProductsPage = () => {
             </div>
           </div>
         )}
+
+        {/* Debug: Show product count */}
+        <div className="text-white text-center mb-4 text-sm opacity-50">
+          Total Products: {products.length} | Filtered: {filteredProducts.length} | Showing: {currentProducts.length}
+        </div>
 
         {/* Products Grid */}
         {currentProducts.length === 0 ? (
@@ -238,7 +261,7 @@ const ProductsPage = () => {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {currentProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <ProductCard key={product._id || product.id} product={product} />
               ))}
             </div>
 

@@ -29,11 +29,10 @@ export const forgotPassword = async (req, res) => {
 
     // Generate OTP
     const otp = generateOTP();
-    console.log(`Password reset OTP for ${email}: ${otp}`);
 
     // Save OTP to user document
     user.resetPasswordOTP = otp;
-    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); 
     await user.save();
 
     // Send OTP email
@@ -47,7 +46,6 @@ export const forgotPassword = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Password reset OTP sent to your email',
-      devOTP: process.env.NODE_ENV !== 'production' ? otp : undefined
     });
   } catch (error) {
     console.error('Forgot password error:', error);

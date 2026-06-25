@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 
 const AdminUsers = () => {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +43,23 @@ const AdminUsers = () => {
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Check if a user is the main admin (the one currently logged in)
+  const isMainAdmin = (user) => {
+    return currentUser?._id === user._id && currentUser?.role === 'admin';
+  };
+
+  // Check if user is admin
+  const isAdmin = (user) => {
+    return user?.role === 'admin';
+  };
+
   const openRoleModal = (user) => {
+    // Prevent role change for the main admin
+    if (isMainAdmin(user)) {
+      error('You cannot change your own role');
+      return;
+    }
+    
     const newRoleValue = user.role === 'admin' ? 'user' : 'admin';
     setSelectedUser(user);
     setNewRole(newRoleValue);
@@ -69,6 +87,19 @@ const AdminUsers = () => {
   };
 
   const openDeleteModal = (user) => {
+    // Prevent deleting the main admin
+    if (isMainAdmin(user)) {
+      error('You cannot delete your own account');
+      return;
+    }
+    
+    // Prevent deleting the last admin
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    if (isAdmin(user) && adminCount <= 1) {
+      error('Cannot delete the only admin user. Please assign another admin first.');
+      return;
+    }
+    
     setUserToDelete(user);
     setDeleteModalOpen(true);
   };
@@ -175,62 +206,99 @@ const AdminUsers = () => {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user._id} className="hover:bg-slate-700/50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center shadow-md">
-                          <span className="text-white font-semibold">
-                            {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-                          </span>
+                filteredUsers.map((user) => {
+                  const isCurrentUser = isMainAdmin(user);
+                  const isUserAdmin = isAdmin(user);
+                  const adminCount = users.filter(u => u.role === 'admin').length;
+                  const canDelete = !isCurrentUser && !(isUserAdmin && adminCount <= 1);
+                  
+                  return (
+                    <tr key={user._id} className="hover:bg-slate-700/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-10 w-10 rounded-full flex items-center justify-center shadow-md ${
+                            isCurrentUser 
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-500' 
+                              : isUserAdmin 
+                                ? 'bg-gradient-to-r from-purple-500 to-purple-600' 
+                                : 'bg-gradient-to-r from-blue-500 to-teal-500'
+                          }`}>
+                            <span className="text-white font-semibold">
+                              {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">
+                              {user.name || 'N/A'}
+                              {isCurrentUser && (
+                                <span className="ml-2 text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
+                                  You
+                                </span>
+                              )}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">{user.name || 'N/A'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs font-semibold rounded-full ${
-                        user.role === 'admin' 
-                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
-                          : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      }`}>
-                        {user.role || 'user'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => openRoleModal(user)}
-                          className="text-blue-400 hover:text-blue-300 transition-colors p-1"
-                          title="Change Role"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        
-                        {user.email !== 'admin@example.com' && (
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs font-semibold rounded-full ${
+                          user.role === 'admin' 
+                            ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
+                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        }`}>
+                          {user.role || 'user'}
+                          {isCurrentUser && (
+                            <span className="ml-1 text-amber-400"></span>
+                          )}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => openRoleModal(user)}
+                            disabled={isCurrentUser}
+                            className={`p-1 transition-colors ${
+                              isCurrentUser 
+                                ? 'text-slate-500 cursor-not-allowed' 
+                                : 'text-blue-400 hover:text-blue-300'
+                            }`}
+                            title={isCurrentUser ? 'You cannot change your own role' : 'Change Role'}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          
                           <button
                             onClick={() => openDeleteModal(user)}
-                            className="text-red-400 hover:text-red-300 transition-colors p-1"
-                            title="Delete User"
+                            disabled={!canDelete}
+                            className={`p-1 transition-colors ${
+                              !canDelete 
+                                ? 'text-slate-500 cursor-not-allowed' 
+                                : 'text-red-400 hover:text-red-300'
+                            }`}
+                            title={
+                              isCurrentUser 
+                                ? 'You cannot delete your own account' 
+                                : isUserAdmin && adminCount <= 1 
+                                  ? 'Cannot delete the only admin' 
+                                  : 'Delete User'
+                            }
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

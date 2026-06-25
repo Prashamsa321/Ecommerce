@@ -1,93 +1,71 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api'
-
-const getAuthConfig = () => {
-  const token = localStorage.getItem('token')
-  return {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  }
-}
+const API_URL = 'http://localhost:5000/api';
 
 export const productService = {
   // Get all products
   async getAllProducts() {
     try {
-      const response = await axios.get(`${API_URL}/products/getproduct`)
+      const response = await axios.get(`${API_URL}/products/getproduct`);
+      console.log('Product service response:', response.data);
       
-      if (response.data && response.data.success && Array.isArray(response.data.products)) {
-        return response.data.products
+      // Return the products array from the response
+      if (response.data && response.data.products && Array.isArray(response.data.products)) {
+        return response.data.products;
       } else if (Array.isArray(response.data)) {
-        return response.data
-      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        return response.data.data
+        return response.data;
       } else {
-        console.error('Unexpected response format:', response.data)
-        return []
+        console.error('Unexpected response format:', response.data);
+        return [];
       }
     } catch (error) {
-      console.error('Get products error:', error.response?.data || error.message)
-      throw error
+      console.error('Get products error:', error.response?.data || error.message);
+      throw error;
     }
   },
 
   // Get single product
   async getProductById(id) {
     try {
-      const response = await axios.get(`${API_URL}/products/getproduct/${id}`)
-      return response.data.product || response.data
+      const response = await axios.get(`${API_URL}/products/getproduct/${id}`);
+      return response.data.product || response.data;
     } catch (error) {
-      console.error('Get product error:', error.response?.data || error.message)
-      throw error
+      console.error('Get product error:', error.response?.data || error.message);
+      throw error;
     }
   },
 
-  // Create new product (Admin only)
+  // Create product (admin only)
   async createProduct(productData) {
-    try {
-      const response = await axios.post(
-        `${API_URL}/products/createproduct`,
-        productData,
-        getAuthConfig()
-      )
-      return response.data
-    } catch (error) {
-      console.error('Create product error:', error.response?.data || error.message)
-      throw error
-    }
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `${API_URL}/products/createproduct`,
+      productData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
   },
 
-  // Update product (Admin only)
+  // Update product (admin only)
   async updateProduct(id, productData) {
-    try {
-      const response = await axios.put(
-        `${API_URL}/products/updateproduct/${id}`,
-        productData,
-        getAuthConfig()
-      )
-      return response.data
-    } catch (error) {
-      console.error('Update product error:', error.response?.data || error.message)
-      throw error
-    }
+    const token = localStorage.getItem('token');
+    const response = await axios.put(
+      `${API_URL}/products/updateproduct/${id}`,
+      productData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
   },
 
-  // Delete product (Admin only)
+  // Delete product (admin only)
   async deleteProduct(id) {
-    try {
-      const response = await axios.delete(
-        `${API_URL}/products/deleteproduct/${id}`,
-        getAuthConfig()
-      )
-      return response.data
-    } catch (error) {
-      console.error('Delete product error:', error.response?.data || error.message)
-      throw error
-    }
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(
+      `${API_URL}/products/deleteproduct/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
   }
-}
+};
 
-export default productService
+export default productService;

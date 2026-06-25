@@ -68,14 +68,6 @@ const TopAnnouncementBar = () => {
         <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-slate-900 to-transparent pointer-events-none" />
       </div>
 
-      {/* Close Button */}
-      <button
-        onClick={handleClose}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-700 transition-all duration-200 z-10 opacity-0 group-hover:opacity-100"
-        aria-label="Close announcement"
-      >
-        <X className="w-4 h-4 text-slate-400 hover:text-white" />
-      </button>
 
       {/* FIXED: Removed 'jsx' attribute from style tag */}
       <style>{`

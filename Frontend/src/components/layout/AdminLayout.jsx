@@ -11,7 +11,17 @@ function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const sidebarRef = useRef(null);
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const navItems = [
     { path: "/admin", name: "Dashboard", icon: "📊", dropdown: false },
@@ -82,6 +92,25 @@ function AdminLayout() {
     } catch (error) {
       toastError("Logout failed");
     }
+  };
+
+  // Format time
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  };
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   if (!user || user.role !== 'admin') {
@@ -224,7 +253,7 @@ function AdminLayout() {
         </div>
       </aside>
 
-      {/* Main Content Area - Fixed margin */}
+      {/* Main Content Area */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
         {/* Top Navbar */}
         <header className="bg-slate-800 shadow-md px-6 py-4 flex justify-between items-center sticky top-0 z-10 border-b border-slate-700">
@@ -232,8 +261,41 @@ function AdminLayout() {
             {/* Welcome message or breadcrumb can go here */}
           </div>
 
-          <div className="flex items-center gap-2">
-        
+          <div className="flex items-center gap-3">
+            {/* View Store Button - ADD THIS */}
+            <Link
+              to="/"
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-lg hover:from-blue-700 hover:to-teal-600 transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span>View Store</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </Link>
+
+            {/* Current Time Display */}
+            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-mono text-white">
+                  {formatTime(currentTime)}
+                </span>
+              </div>
+              <div className="w-px h-6 bg-slate-600"></div>
+              <div className="flex items-center gap-1">
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-xs text-slate-400">
+                  {formatDate(currentTime)}
+                </span>
+              </div>
+            </div>
 
             {/* User Profile Dropdown */}
             <div className="relative">

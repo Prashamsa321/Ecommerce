@@ -14,6 +14,7 @@ const AdminDashboard = () => {
     totalRevenue: 0
   });
   const [loading, setLoading] = useState(true);
+  const [recentOrders, setRecentOrders] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -25,7 +26,8 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
       
       const [productsRes, usersRes, ordersRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/products/getproduct', {
+        // Get only the total count, not all products
+        axios.get('http://localhost:5000/api/products/getproduct?page=1&limit=1', {
           headers: { Authorization: `Bearer ${token}` }
         }),
         axios.get('http://localhost:5000/api/auth/users', {
@@ -36,13 +38,17 @@ const AdminDashboard = () => {
         }).catch(() => ({ data: { orders: [] } }))
       ]);
 
-      const products = productsRes.data.products || [];
-      const totalProducts = products.length;
+      // Get total products count from response
+      const totalProducts = productsRes.data.totalProducts || productsRes.data.products?.length || 0;
       const users = usersRes.data.users || [];
       const totalUsers = users.length;
       const orders = ordersRes.data.orders || [];
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
+      // Get recent orders for graph
+      const sortedOrders = orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setRecentOrders(sortedOrders.slice(0, 7));
 
       setStats({
         totalProducts,
@@ -57,6 +63,36 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  // Calculate weekly revenue data
+  const getWeeklyData = () => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const weeklyData = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dayStr = date.toISOString().split('T')[0];
+      
+      const dayOrders = recentOrders.filter(order => {
+        return order.createdAt?.split('T')[0] === dayStr;
+      });
+      
+      const total = dayOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      
+      weeklyData.push({
+        day: days[date.getDay()],
+        amount: total,
+        orders: dayOrders.length
+      });
+    }
+    
+    return weeklyData;
+  };
+
+  const weeklyData = getWeeklyData();
+  const maxAmount = Math.max(...weeklyData.map(d => d.amount), 1);
 
   const statsCards = [
     { 
@@ -150,9 +186,10 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
+      {/* Quick Actions & Analytics Graph */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Actions */}
+        <div className="lg:col-span-1 bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
           <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
             <span className="text-xl">⚡</span>
             Quick Actions
@@ -170,32 +207,81 @@ const AdminDashboard = () => {
             >
               View All Orders
             </Link>
+            <Link
+              to="/admin/users"
+              className="block w-full text-center border border-purple-500 text-purple-400 px-4 py-2.5 rounded-lg hover:bg-purple-500/10 transition-all duration-300 font-medium"
+            >
+              Manage Users
+            </Link>
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
-          <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-            <span className="text-xl">ℹ️</span>
-            Admin Info
-          </h3>
-          <div className="space-y-2 text-sm">
+        {/* Weekly Revenue Graph */}
+        <div className="lg:col-span-2 bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+              <span className="text-xl">📊</span>
+              Weekly Revenue
+            </h3>
+            <span className="text-xs text-slate-400">Last 7 days</span>
+          </div>
+
+          {/* Graph Bars */}
+          <div className="flex items-end justify-between h-48 gap-2">
+            {weeklyData.map((data, index) => {
+              const heightPercent = maxAmount > 0 ? (data.amount / maxAmount) * 100 : 0;
+              const isHighest = data.amount === maxAmount && maxAmount > 0;
+              
+              return (
+                <div key={index} className="flex flex-col items-center flex-1">
+                  <div className="relative w-full flex justify-center">
+                    {data.amount > 0 && (
+                      <div className="absolute -top-6 text-xs text-slate-400 whitespace-nowrap">
+                        रू {data.amount.toLocaleString()}
+                      </div>
+                    )}
+                    <div 
+                      className={`w-full max-w-[40px] rounded-t-lg transition-all duration-500 relative group cursor-pointer ${
+                        isHighest ? 'bg-gradient-to-t from-amber-500 to-orange-500' : 'bg-gradient-to-t from-blue-500 to-teal-400'
+                      }`}
+                      style={{ height: `${Math.max(heightPercent, 4)}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300 rounded-t-lg"></div>
+                      {data.orders > 0 && (
+                        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          {data.orders} order{data.orders > 1 ? 's' : ''}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-slate-400 mt-2">{data.day}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Graph Legend */}
+          <div className="flex justify-center gap-6 mt-6 pt-4 border-t border-slate-700">
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 w-16">Name:</span>
-              <span className="text-white font-medium">{user?.name}</span>
+              <div className="w-3 h-3 rounded bg-gradient-to-t from-blue-500 to-teal-400"></div>
+              <span className="text-xs text-slate-400">Revenue</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 w-16">Email:</span>
-              <span className="text-slate-300">{user?.email}</span>
+              <div className="w-3 h-3 rounded bg-gradient-to-t from-amber-500 to-orange-500"></div>
+              <span className="text-xs text-slate-400">Highest</span>
             </div>
           </div>
-          
-          <button
-            onClick={fetchDashboardData}
-            className="mt-4 w-full text-center text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center justify-center gap-1"
-          >
-            🔄 Refresh Data
-          </button>
         </div>
+      </div>
+
+      {/* Refresh Button */}
+      <div className="text-center">
+        <button
+          onClick={fetchDashboardData}
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center justify-center gap-1"
+        >
+          🔄 Refresh Data
+        </button>
       </div>
     </div>
   );
