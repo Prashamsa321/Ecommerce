@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyAdmin = useCallback(async () => {
     const storedToken = token || localStorage.getItem('token')
-    if (!storedToken) return { isAdmin: false }
+    if (!storedToken) return { isAdmin: false, unauthorized: true }
 
     try {
       const response = await axios.get(`${API_URL}/auth/me`, {
@@ -110,15 +110,34 @@ export const AuthProvider = ({ children }) => {
       })
       const serverUser = response.data?.user
       if (!serverUser || serverUser.role !== 'admin') {
-        return { isAdmin: false }
+        return { isAdmin: false, unauthorized: true }
       }
 
       localStorage.setItem('user', JSON.stringify(serverUser))
       setUser(serverUser)
       setIsAuthenticated(true)
       return { isAdmin: true, user: serverUser }
-    } catch {
-      return { isAdmin: false }
+    } catch (error) {
+      const status = error.response?.status
+      if (status === 401 || status === 403) {
+        return { isAdmin: false, unauthorized: true }
+      }
+
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser)
+          if (parsed.role === 'admin') {
+            setUser(parsed)
+            setIsAuthenticated(true)
+            return { isAdmin: true, user: parsed, offline: true }
+          }
+        } catch {
+          // ignore parse errors
+        }
+      }
+
+      return { isAdmin: false, unauthorized: false }
     }
   }, [token])
 

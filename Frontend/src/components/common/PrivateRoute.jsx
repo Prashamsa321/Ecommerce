@@ -6,10 +6,10 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
   const { isAuthenticated, user, loading, verifyAdmin, logout } = useAuth();
   const location = useLocation();
   const [checkingAdmin, setCheckingAdmin] = useState(adminOnly);
-  const [adminVerified, setAdminVerified] = useState(!adminOnly);
+  const [adminVerified, setAdminVerified] = useState(false);
 
   useEffect(() => {
-    if (!adminOnly) return;
+    if (!adminOnly || loading) return;
 
     let active = true;
 
@@ -30,11 +30,15 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
         return;
       }
 
+      if (active) setCheckingAdmin(true);
+
       const result = await verifyAdmin();
       if (!active) return;
 
       if (!result.isAdmin) {
-        logout();
+        if (result.unauthorized) {
+          logout();
+        }
         setAdminVerified(false);
       } else {
         setAdminVerified(true);
@@ -47,7 +51,7 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
     return () => {
       active = false;
     };
-  }, [adminOnly, isAuthenticated, user?.role, verifyAdmin, logout]);
+  }, [adminOnly, loading, isAuthenticated, user?.role, verifyAdmin, logout]);
 
   if (loading || checkingAdmin) {
     return (

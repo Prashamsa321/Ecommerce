@@ -187,3 +187,38 @@ export const sendPasswordResetOTP = async (email, otp, name) => {
   })
   return result
 }
+
+const contactAdminHtml = ({ name, email, subject, message }) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #F97316;">New Contact Message</h2>
+    <p><strong>From:</strong> ${name} (${email})</p>
+    <p><strong>Subject:</strong> ${subject}</p>
+    <p style="white-space: pre-wrap;">${message}</p>
+  </div>
+`
+
+const contactUserHtml = ({ name, subject }) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #F97316;">Thanks for contacting MeroGadget</h2>
+    <p>Hello ${name},</p>
+    <p>We received your message about "${subject}" and will get back to you soon.</p>
+  </div>
+`
+
+export const sendAdminContactNotification = async ({ name, email, subject, message }) =>
+  deliverEmail({
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || email,
+    subject: `New contact: ${subject}`,
+    html: contactAdminHtml({ name, email, subject, message }),
+    context: 'Contact admin notification',
+    name,
+  })
+
+export const sendUserContactConfirmation = async ({ name, email, subject }) =>
+  deliverEmail({
+    to: email,
+    subject: 'We received your message - MeroGadget',
+    html: contactUserHtml({ name, subject }),
+    context: 'Contact user confirmation',
+    name,
+  })

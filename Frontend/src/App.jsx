@@ -29,6 +29,7 @@ import AdminProfile from './pages/admin/AdminProfile';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminRoleManagement from './pages/admin/AdminRoleManagement';
+import AdminReports from './pages/admin/AdminReports';
 
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
           </PrivateRoute>
         }>
           <Route index element={<AdminDashboard />} />
+          <Route path="reports" element={<AdminReports />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="products/create" element={<CreateProductPage />} />
           <Route path="products/:id/edit" element={<CreateProductPage />} />
