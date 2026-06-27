@@ -6,7 +6,7 @@ import {
   updateProduct,
   deleteProduct
 } from '../controllers/product.controller.js'
-import { protect } from '../middleware/auth.middleware.js'
+import { protect, adminOnly } from '../middleware/auth.middleware.js'
 
 const router = express.Router()
 
@@ -15,8 +15,8 @@ router.get('/getproduct', getAllProducts)
 router.get('/getproduct/:id', getProductById)
 
 // Admin only routes
-router.post('/createproduct', protect, createProduct)
-router.put('/updateproduct/:id', protect, updateProduct)
-router.delete('/deleteproduct/:id', protect, deleteProduct)
+router.post('/createproduct', protect, adminOnly, createProduct)
+router.put('/updateproduct/:id', protect, adminOnly, updateProduct)
+router.delete('/deleteproduct/:id', protect, adminOnly, deleteProduct)
 
 export default router

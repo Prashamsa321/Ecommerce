@@ -46,72 +46,78 @@ const ProductModal = ({ isOpen, onClose, product }) => {
       error('Admin users cannot add items to cart');
       return;
     }
-    // ... addToCart logic ...
-    // For demo purposes:
-    success(`${quantity}x ${product.name} added to cart!`);
-    onClose();
+    
+    const result = await addToCart(product._id, quantity);
+    
+    if (result.success) {
+      success(`${quantity}x ${product.name} added to cart!`);
+      onClose();
+    } else if (result.notAuthenticated) {
+      error(result.error || 'Please login to add items to cart');
+    } else if (result.alreadyInCart) {
+      error(result.message || 'Item already in cart');
+    } else if (result.error) {
+      error(result.error);
+    }
   };
 
-  const images = product.images?.filter((img) => img) || [];
+  const images = product.images?.filter(img => img) || [];
   const hasImages = images.length > 0;
 
   return (
-    <div
+    <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md animate-fade-in p-4"
       onClick={handleBackdropClick}
     >
-      <div
-        className="bg-[#111827] rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden border border-[#1E3A8A] animate-scale-up flex flex-col"
+      <div 
+        className="bg-gradient-to-br from-[#111827] to-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-divider animate-scale-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* --- Modal Header --- */}
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#1E3A8A] bg-[#111827]/95 shrink-0">
+        {/* Modal Header */}
+        <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-divider px-8 py-6 flex justify-between items-center rounded-t-3xl z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#FF6200]/20 rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-[#FF6200]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-brand-orange/20 rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-lg font-bold text-white">Product Details</h2>
+            <h2 className="text-xl font-bold text-text-primary">Product Details</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-all duration-300 text-xl w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#1E3A8A] hover:scale-110"
+            className="text-text-muted hover:text-white transition-all duration-300 text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-brand-light hover:scale-110"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
-        {/* --- Modal Body (Scrollable) --- */}
-        <div className="overflow-y-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            {/* --- Left Column: Images --- */}
-            <div className="flex flex-col gap-4">
-              {/* Main Image */}
-              <div className="bg-[#0A2540] rounded-xl aspect-square flex items-center justify-center overflow-hidden border border-[#1E3A8A]">
+        {/* Modal Body */}
+        <div className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column - Images */}
+            <div>
+              <div className="bg-gradient-auth rounded-2xl h-80 flex items-center justify-center overflow-hidden mb-4 border border-divider group">
                 {hasImages ? (
-                  <img
-                    src={images[currentImage]}
+                  <img 
+                    src={images[currentImage]} 
                     alt={product.name}
-                    className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="text-6xl opacity-30">📦</div>
+                  <div className="text-8xl opacity-30">ðŸ“¦</div>
                 )}
               </div>
-
-              {/* Thumbnails */}
+              
               {hasImages && images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {images.map((img, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentImage(index)}
-                      className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 shrink-0 ${
-                        currentImage === index
-                          ? 'border-[#FF6200] ring-2 ring-[#FF6200]/30'
-                          : 'border-[#1E3A8A] hover:border-[#22D3EE]'
+                      className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 flex-shrink-0 ${
+                        currentImage === index 
+                          ? 'border-brand-orange ring-2 ring-brand-orange/30 shadow-lg shadow-orange-500/20' 
+                          : 'border-divider hover:border-brand-orange'
                       }`}
                     >
                       <img src={img} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
@@ -121,113 +127,137 @@ const ProductModal = ({ isOpen, onClose, product }) => {
               )}
             </div>
 
-            {/* --- Right Column: Product Info --- */}
-            <div className="flex flex-col">
-              <h3 className="text-2xl font-bold text-white mb-2">{product.name}</h3>
+            {/* Right Column - Product Info */}
+            <div>
+              {/* Product Name */}
+              <h3 className="text-2xl font-bold text-text-primary mb-2 leading-tight">{product.name}</h3>
               
-              {/* Category */}
-              <div className="mb-4">
-                <span className="text-xs bg-[#1E3A8A]/50 text-[#22D3EE] px-3 py-1 rounded-full border border-[#22D3EE]/30">
-                  {product.category}
-                </span>
-              </div>
-
+              {/* Category Badge */}
+              {product.category && (
+                <div className="mb-4">
+                  <span className="text-xs bg-brand-light/50 text-brand-orange px-3 py-1.5 rounded-full border border-brand-orange/30">
+                    {product.category}
+                  </span>
+                </div>
+              )}
+              
               {/* Price */}
               <div className="mb-4">
-                <span className="text-3xl font-bold text-[#FF6200]">
-                  ₹ {product.price?.toFixed(2)}
+                <span className="text-3xl font-bold text-brand-orange">
+                â‚¹ {product.price?.toFixed(2)}
                 </span>
                 {product.originalPrice && (
-                  <span className="ml-2 text-sm text-gray-400 line-through">
-                    ₹{product.originalPrice.toFixed(2)}
+                  <span className="ml-2 text-sm text-text-muted line-through">
+                    â‚¹{product.originalPrice.toFixed(2)}
                   </span>
                 )}
               </div>
-
+              
               {/* Stock Status */}
-              <div className="mb-6">
+              <div className="mb-4">
                 {product.stock > 0 ? (
-                  <span className="text-sm text-[#22D3EE] bg-[#22D3EE]/10 px-4 py-1.5 rounded-full inline-flex items-center gap-1">
-                    <span className="w-2 h-2 bg-[#22D3EE] rounded-full animate-pulse"></span>
-                    ✓ In Stock
+                  <span className="text-sm text-brand-orange bg-brand-orange/10 px-4 py-1.5 rounded-full inline-flex items-center gap-1">
+                    <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse"></span>
+                    âœ“ In Stock 
                   </span>
                 ) : (
-                  <span className="text-sm text-[#FF3B30] bg-[#FF3B30]/10 px-4 py-1.5 rounded-full">
-                    ✗ Out of Stock
+                  <span className="text-sm text-[#FF3B30] bg-[#FF3B30]/10 px-4 py-1.5 rounded-full inline-flex items-center gap-1">
+                    âœ— Out of Stock
                   </span>
                 )}
               </div>
-
+              
               {/* Description */}
               <div className="mb-6">
-                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#22D3EE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h4 className="font-semibold text-text-primary mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Description
                 </h4>
-                <p className="text-sm text-gray-300 leading-relaxed">
+                <p className="text-text-secondary leading-relaxed">
                   {product.description}
                 </p>
               </div>
-
-              {/* Quantity */}
-              <div className="mb-6 p-4 bg-[#0A2540]/50 rounded-xl border border-[#1E3A8A] text-center">
-                <label className="block text-sm font-medium text-gray-300 mb-3">Select Quantity</label>
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 bg-[#1E3A8A] rounded-lg hover:bg-[#FF6200] transition-all duration-300 text-white text-lg flex items-center justify-center"
-                  >
-                    -
-                  </button>
-                  <span className="w-12 text-center text-xl font-semibold text-white">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="w-10 h-10 bg-[#1E3A8A] rounded-lg hover:bg-[#FF6200] transition-all duration-300 text-white text-lg flex items-center justify-center"
-                  >
-                    +
-                  </button>
+              
+              {/* Quantity Selector */}
+              {user?.role !== 'admin' && product.stock > 0 && (
+                <div className="mb-6 text-center p-4 bg-surface-primary/50 rounded-xl border border-divider">
+                  <label className="block text-sm font-medium text-text-secondary mb-3">Select Quantity</label>
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-12 h-12  bg-brand-light rounded-xl hover:bg-brand-orange hover:text-white transition-all duration-300 text-white text-xl flex items-center justify-center hover:shadow-lg"
+                    >
+                      -
+                    </button>
+                    <span className="w-16 text-center text-xl font-semibold text-text-primary">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                      className="w-12 h-12 bg-brand-light rounded-xl hover:bg-brand-orange hover:text-white transition-all duration-300 text-white text-xl flex items-center justify-center hover:shadow-lg"
+                    >
+                      +
+                    </button>
+                   
+                  </div>
                 </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 mt-auto">
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-gradient-to-r from-[#FF6200] to-[#FF3D00] text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                  Add to Cart
-                </button>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                {user?.role !== 'admin' && product.stock > 0 && (
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white py-4 rounded-xl font-semibold hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    Add to Cart ({quantity})
+                  </button>
+                )}
                 <button
                   onClick={onClose}
-                  className="flex-1 bg-[#1E3A8A] text-white py-3 rounded-lg font-semibold hover:bg-[#FF6200] transition-all duration-300 active:scale-95"
+                  className="flex-1 bg-brand-light text-white py-4 rounded-xl font-semibold hover:bg-brand-orange hover:text-white transition-all duration-300 active:scale-95"
                 >
                   Close
                 </button>
               </div>
+
+              
             </div>
           </div>
         </div>
       </div>
 
-      {/* --- CSS Animations --- */}
       <style jsx>{`
         @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
+        
         @keyframes scale-up {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
-        .animate-fade-in { animation: fade-in 0.2s ease-out; }
-        .animate-scale-up { animation: scale-up 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out;
+        }
+        
+        .animate-scale-up {
+          animation: scale-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
       `}</style>
     </div>
   );

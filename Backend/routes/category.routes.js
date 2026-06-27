@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../middleware/auth.middleware.js';
+import { protect, adminOnly } from '../middleware/auth.middleware.js';
 import {
   getAllCategories,
   getCategoryById,
@@ -15,8 +15,8 @@ router.get('/', getAllCategories);
 router.get('/:id', getCategoryById);
 
 // Admin only routes
-router.post('/', protect, createCategory);
-router.put('/:id', protect, updateCategory);
-router.delete('/:id', protect, deleteCategory);
+router.post('/', protect, adminOnly, createCategory);
+router.put('/:id', protect, adminOnly, updateCategory);
+router.delete('/:id', protect, adminOnly, deleteCategory);
 
 export default router;

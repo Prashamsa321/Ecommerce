@@ -1,85 +1,71 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { productService } from '../../services/productService';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 
 const AdminProducts = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { success, error } = useToast();
   
-  // Get page from URL params
-  const currentPage = parseInt(searchParams.get('page')) || 1;
+  const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  // Debounce search
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // Fetch products with pagination
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await productService.getAllProducts(
-        currentPage,
-        itemsPerPage,
-        debouncedSearch
-      );
-      
-      setProducts(data.products || []);
-      setTotalProducts(data.totalProducts || 0);
-      setTotalPages(data.totalPages || 1);
-    } catch (err) {
+      const { products: data, pagination } = await productService.getProducts({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm.trim(),
+      });
+      setProducts(data);
+      setTotalPages(pagination.totalPages);
+      setTotalProducts(pagination.total);
+    } catch {
       error('Failed to fetch products');
       setProducts([]);
-      setTotalProducts(0);
       setTotalPages(1);
+      setTotalProducts(0);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage, debouncedSearch, error]);
+  }, [currentPage, itemsPerPage, searchTerm, error]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, searchTerm ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [fetchProducts, searchTerm]);
 
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setSearchParams({ page: 1 });
-    }
-  }, [debouncedSearch]);
+  const currentProducts = products;
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = totalProducts === 0 ? 0 : indexOfLastItem - itemsPerPage + 1;
 
   const goToPage = (pageNumber) => {
-    setSearchParams({ page: pageNumber });
+    setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
-      setSearchParams({ page: currentPage + 1 });
+      setCurrentPage(currentPage + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
-      setSearchParams({ page: currentPage - 1 });
+      setCurrentPage(currentPage - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -113,8 +99,8 @@ const AdminProducts = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-orange"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-brand-orange animate-pulse opacity-50"></div>
         </div>
       </div>
     );
@@ -125,19 +111,19 @@ const AdminProducts = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Products Management</h1>
-          <p className="text-slate-400 mt-1">Manage your product inventory</p>
+          <h1 className="text-2xl font-bold text-text-primary">Products Management</h1>
+          <p className="text-text-muted mt-1">Manage your product inventory</p>
         </div>
         <Link
           to="/admin/products/create"
-          className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center gap-2 shadow-md"
+          className="bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white px-5 py-2.5 rounded-lg hover:from-brand-orange-dark hover:to-brand-orange transition-all duration-300 flex items-center gap-2 shadow-md"
         >
           <span className="text-xl">+</span> Add New Product
         </Link>
       </div>
 
       {/* Search and Results Info */}
-      <div className="bg-slate-800 rounded-xl shadow-lg p-5 border border-slate-700">
+      <div className="bg-white rounded-xl shadow-lg p-5 border border-divider">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="relative flex-1">
             <input
@@ -146,44 +132,41 @@ const AdminProducts = () => {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                // Reset to page 1 when searching
-                if (currentPage !== 1) {
-                  setSearchParams({ page: 1 });
-                }
+                setCurrentPage(1);
               }}
-              className="w-full px-4 py-2.5 pl-10 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 pl-10 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
             />
-            <span className="absolute left-3 top-3 text-slate-400">🔍</span>
+            <span className="absolute left-3 top-3 text-text-muted">ðŸ”</span>
           </div>
-          <div className="text-sm text-slate-400 flex items-center">
-            Total: <span className="text-white font-semibold ml-1 mr-1">{totalProducts}</span> products
+          <div className="text-sm text-text-muted flex items-center">
+            Total: <span className="text-text-primary font-semibold ml-1 mr-1">{totalProducts}</span> products
           </div>
         </div>
       </div>
 
       {/* Products Table */}
-      <div className="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-slate-700">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-divider">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-700">
-            <thead className="bg-slate-900">
+            <thead className="bg-surface-primary">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Product</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Product</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Price</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Stock</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-slate-800 divide-y divide-slate-700">
-              {products.length === 0 ? (
+            <tbody className="bg-white divide-y divide-slate-700">
+              {currentProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
-                    <div className="text-5xl mb-2">📦</div>
+                  <td colSpan="5" className="px-6 py-12 text-center text-text-muted">
+                    <div className="text-5xl mb-2">ðŸ“¦</div>
                     <p>No products found</p>
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm('')}
-                        className="mt-2 text-blue-400 hover:text-blue-300 transition-colors"
+                        className="mt-2 text-brand-orange hover:text-brand-orange-dark transition-colors"
                       >
                         Clear search
                       </button>
@@ -191,11 +174,11 @@ const AdminProducts = () => {
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
-                  <tr key={product._id} className="hover:bg-slate-700/50 transition-colors">
+                currentProducts.map((product) => (
+                  <tr key={product._id} className="hover:bg-brand-light/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden border border-slate-700">
+                        <div className="w-12 h-12 bg-surface-primary rounded-lg flex items-center justify-center overflow-hidden border border-divider">
                           {product.images?.[0] ? (
                             <img
                               src={product.images[0]}
@@ -203,25 +186,25 @@ const AdminProducts = () => {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-slate-500 text-xl">📦</span>
+                            <span className="text-text-muted text-xl">ðŸ“¦</span>
                           )}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-white">{product.name?.substring(0, 30)}</p>
-                          <p className="text-xs text-slate-400 truncate max-w-xs">
+                          <p className="text-xs text-text-muted truncate max-w-xs">
                             {product.description?.substring(0, 50)}...
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">
+                      <span className="px-2 py-1 text-xs font-medium bg-brand-light0/20 text-brand-orange rounded-full border border-brand-orange/20">
                         {product.category || 'Uncategorized'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-teal-400">
-                        रू {product.price?.toLocaleString('en-IN') || '0'}
+                      <span className="text-sm font-semibold text-brand-orange">
+                        à¤°à¥‚ {product.price?.toLocaleString('en-IN') || '0'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -233,7 +216,7 @@ const AdminProducts = () => {
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/admin/products/${product._id}/edit`}
-                          className="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                          className="text-brand-orange hover:text-brand-orange-dark transition-colors p-1"
                           title="Edit Product"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,11 +242,11 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      {/* Pagination with Page Info */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
-          <div className="text-sm text-slate-400">
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalProducts)} of {totalProducts} products
+          <div className="text-sm text-text-muted">
+            Showing {indexOfFirstItem} to {Math.min(indexOfLastItem, totalProducts)} of {totalProducts} products
           </div>
           
           <div className="flex items-center gap-2">
@@ -272,8 +255,8 @@ const AdminProducts = () => {
               disabled={currentPage === 1}
               className={`px-3 py-2 rounded-lg transition-all duration-300 ${
                 currentPage === 1
-                  ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white'
+                  ? 'bg-brand-light text-text-muted cursor-not-allowed'
+                  : 'bg-brand-light text-text-secondary hover:bg-brand-orange hover:text-white'
               }`}
             >
               Previous
@@ -298,8 +281,8 @@ const AdminProducts = () => {
                     onClick={() => goToPage(pageNum)}
                     className={`w-10 h-10 rounded-lg transition-all duration-300 ${
                       currentPage === pageNum
-                        ? 'bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-md'
-                        : 'bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white'
+                        ? 'bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white shadow-md'
+                        : 'bg-brand-light text-text-secondary hover:bg-brand-orange hover:text-white'
                     }`}
                   >
                     {pageNum}
@@ -309,10 +292,10 @@ const AdminProducts = () => {
               
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <>
-                  <span className="px-2 py-2 text-slate-500">...</span>
+                  <span className="px-2 py-2 text-text-muted">...</span>
                   <button
                     onClick={() => goToPage(totalPages)}
-                    className="w-10 h-10 rounded-lg transition-all duration-300 bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white"
+                    className="w-10 h-10 rounded-lg transition-all duration-300 bg-brand-light text-text-secondary hover:bg-brand-orange hover:text-white"
                   >
                     {totalPages}
                   </button>
@@ -325,8 +308,8 @@ const AdminProducts = () => {
               disabled={currentPage === totalPages}
               className={`px-3 py-2 rounded-lg transition-all duration-300 ${
                 currentPage === totalPages
-                  ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                  : 'bg-slate-700 text-slate-300 hover:bg-blue-600 hover:text-white'
+                  ? 'bg-brand-light text-text-muted cursor-not-allowed'
+                  : 'bg-brand-light text-text-secondary hover:bg-brand-orange hover:text-white'
               }`}
             >
               Next

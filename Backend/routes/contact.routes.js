@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../middleware/auth.middleware.js';
+import { protect, adminOnly } from '../middleware/auth.middleware.js';
 import {
   submitContact,
   getAllContacts,
@@ -15,10 +15,10 @@ const router = express.Router();
 router.post('/', submitContact);
 
 // Admin only routes
-router.get('/', protect, getAllContacts);
-router.get('/stats', protect, getContactStats);
-router.get('/:id', protect, getContactById);
-router.put('/:id/reply', protect, replyToContact);
-router.delete('/:id', protect, deleteContact);
+router.get('/', protect, adminOnly, getAllContacts);
+router.get('/stats', protect, adminOnly, getContactStats);
+router.get('/:id', protect, adminOnly, getContactById);
+router.put('/:id/reply', protect, adminOnly, replyToContact);
+router.delete('/:id', protect, adminOnly, deleteContact);
 
 export default router;

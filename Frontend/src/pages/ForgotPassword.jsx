@@ -126,15 +126,15 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A2540] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface-primary px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white">
+          <h2 className="text-3xl font-bold text-text-primary">
             {step === 1 && 'Forgot Password'}
             {step === 2 && 'Verify OTP'}
             {step === 3 && 'Reset Password'}
           </h2>
-          <p className="mt-2 text-gray-300">
+          <p className="mt-2 text-text-secondary">
             {step === 1 && 'Enter your email to receive reset code'}
             {step === 2 && `Enter the 6-digit code sent to ${email}`}
             {step === 3 && 'Create your new password'}
@@ -144,14 +144,14 @@ const ForgotPassword = () => {
         {step === 1 && (
           <form className="mt-8 space-y-6" onSubmit={handleSendOTP}>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent"
+                className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent"
                 placeholder="name@example.com"
                 required
               />
@@ -160,13 +160,13 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#FF6200] text-white py-3.5 rounded-full font-semibold hover:bg-[#E05500] transition-all duration-300 disabled:opacity-50"
+              className="w-full bg-brand-orange text-white py-3.5 rounded-full font-semibold hover:bg-brand-orange-dark transition-all duration-300 disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Send Reset Code'}
             </button>
 
             <div className="text-center">
-              <Link to="/login" className="text-[#22D3EE] hover:text-[#FF6200] text-sm">
+              <Link to="/login" className="text-brand-orange hover:text-brand-orange text-sm">
                 Back to Login
               </Link>
             </div>
@@ -176,7 +176,7 @@ const ForgotPassword = () => {
         {step === 2 && (
           <form className="mt-8 space-y-6" onSubmit={handleVerifyOTP}>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Enter OTP
               </label>
               <input
@@ -184,7 +184,7 @@ const ForgotPassword = () => {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                 maxLength={6}
-                className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-[#FF6200]"
+                className="w-full px-4 py-3 input-field text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-orange"
                 placeholder="000000"
                 required
               />
@@ -193,7 +193,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#FF6200] text-white py-3.5 rounded-full font-semibold hover:bg-[#E05500] transition-all duration-300 disabled:opacity-50"
+              className="w-full bg-brand-orange text-white py-3.5 rounded-full font-semibold hover:bg-brand-orange-dark transition-all duration-300 disabled:opacity-50"
             >
               {loading ? 'Verifying...' : 'Verify OTP'}
             </button>
@@ -203,7 +203,7 @@ const ForgotPassword = () => {
                 type="button"
                 onClick={handleResendOTP}
                 disabled={countdown > 0}
-                className="text-[#22D3EE] hover:text-[#FF6200] text-sm disabled:opacity-50"
+                className="text-brand-orange hover:text-brand-orange text-sm disabled:opacity-50"
               >
                 {countdown > 0 ? `Resend in ${countdown}s` : 'Resend Code'}
               </button>
@@ -214,28 +214,28 @@ const ForgotPassword = () => {
         {step === 3 && (
           <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 New Password
               </label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200]"
+                className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange"
                 placeholder="Minimum 6 characters"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
                 Confirm Password
               </label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200]"
+                className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange"
                 placeholder="Confirm your password"
                 required
               />
@@ -244,7 +244,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#FF6200] text-white py-3.5 rounded-full font-semibold hover:bg-[#E05500] transition-all duration-300 disabled:opacity-50"
+              className="w-full bg-brand-orange text-white py-3.5 rounded-full font-semibold hover:bg-brand-orange-dark transition-all duration-300 disabled:opacity-50"
             >
               {loading ? 'Resetting...' : 'Reset Password'}
             </button>

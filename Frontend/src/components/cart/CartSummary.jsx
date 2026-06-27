@@ -15,27 +15,27 @@ const CartSummary = () => {
       <div className="space-y-2">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>रु{subtotal.toFixed(2)}</span>
+          <span>à¤°à¥{subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Shipping</span>
-          <span>रु{shipping.toFixed(2)}</span>
+          <span>à¤°à¥{shipping.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Tax (10%)</span>
-          <span>रु{tax.toFixed(2)}</span>
+          <span>à¤°à¥{tax.toFixed(2)}</span>
         </div>
         <div className="border-t pt-2 mt-2">
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>रु{total.toFixed(2)}</span>
+            <span>à¤°à¥{total.toFixed(2)}</span>
           </div>
         </div>
       </div>
 
       <button
         disabled={cart.items?.length === 0}
-        className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full mt-6 bg-brand-orange text-white py-3 rounded-lg hover:bg-brand-orange-dark disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Proceed to Checkout
       </button>

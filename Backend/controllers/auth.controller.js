@@ -1,12 +1,21 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { isProtectedAdmin } from '../constants/protectedAdmin.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d'
   });
 };
+
+const toPublicUser = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  lastLogin: user.lastLogin || null,
+});
 
 // Register function
 export const register = async (req, res) => {
@@ -25,7 +34,8 @@ export const register = async (req, res) => {
       name,
       email,
       password,
-      role: 'user'
+      role: 'user',
+      lastLogin: new Date()
     });
 
     if (user) {
@@ -33,12 +43,7 @@ export const register = async (req, res) => {
       res.status(201).json({
         success: true,
         token,
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role
-        }
+        user: toPublicUser(user)
       });
     } else {
       res.status(400).json({
@@ -76,19 +81,63 @@ export const login = async (req, res) => {
       });
     }
 
+    user.lastLogin = new Date();
+    await user.save();
+
     const token = generateToken(user._id);
     res.status(200).json({
       success: true,
       token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      user: toPublicUser(user)
     });
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// Admin panel login — rejects non-admin accounts
+export const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin account required.'
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = generateToken(user._id);
+    res.status(200).json({
+      success: true,
+      token,
+      user: toPublicUser(user)
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -110,12 +159,7 @@ export const getMe = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      user: toPublicUser(user)
     });
   } catch (error) {
     console.error('Get me error:', error);
@@ -254,6 +298,13 @@ export const updateUserRole = async (req, res) => {
         message: 'You cannot change your own role'
       });
     }
+
+    if (isProtectedAdmin(user.email) && role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'This admin account is protected and cannot be removed from the admin role'
+      });
+    }
     
     if (!['user', 'admin'].includes(role)) {
       return res.status(400).json({
@@ -302,6 +353,13 @@ export const deleteUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'You cannot delete your own account'
+      });
+    }
+
+    if (isProtectedAdmin(user.email)) {
+      return res.status(403).json({
+        success: false,
+        message: 'This admin account is protected and cannot be deleted'
       });
     }
     

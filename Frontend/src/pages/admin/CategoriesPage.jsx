@@ -17,10 +17,10 @@ const CategoriesPage = () => {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   const iconOptions = [
-    { icon: '📺' }, { icon: '🧊' }, { icon: '❄️' }, { icon: '⌚' },
-    { icon: '📱' }, { icon: '💻' }, { icon: '🎧' }, { icon: '🎮' },
-    { icon: '📷' }, { icon: '🔊' }, { icon: '🖥️' }, { icon: '⌨️' },
-    { icon: '🖨️' }, { icon: '📡' }, { icon: '🔋' }, { icon: '💾' }
+    { icon: 'ðŸ“º' }, { icon: 'ðŸ§Š' }, { icon: 'â„ï¸' }, { icon: 'âŒš' },
+    { icon: 'ðŸ“±' }, { icon: 'ðŸ’»' }, { icon: 'ðŸŽ§' }, { icon: 'ðŸŽ®' },
+    { icon: 'ðŸ“·' }, { icon: 'ðŸ”Š' }, { icon: 'ðŸ–¥ï¸' }, { icon: 'âŒ¨ï¸' },
+    { icon: 'ðŸ–¨ï¸' }, { icon: 'ðŸ“¡' }, { icon: 'ðŸ”‹' }, { icon: 'ðŸ’¾' }
   ];
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const CategoriesPage = () => {
     try {
       await categoryService.createCategory({
         name: newCategoryName,
-        icon: '📦'
+        icon: 'ðŸ“¦'
       });
       
       success('Category added successfully');
@@ -82,7 +82,7 @@ const CategoriesPage = () => {
   const handleEditCategory = (category) => {
     setEditingCategory(category);
     setEditName(category.name);
-    setEditIcon(category.icon || '📦');
+    setEditIcon(category.icon || 'ðŸ“¦');
   };
 
   const handleUpdateCategory = async () => {
@@ -108,7 +108,7 @@ const CategoriesPage = () => {
   const handleCancelEdit = () => {
     setEditingCategory(null);
     setEditName('');
-    setEditIcon('📦');
+    setEditIcon('ðŸ“¦');
   };
 
   const openDeleteModal = (category) => {
@@ -134,8 +134,8 @@ const CategoriesPage = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-orange"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-brand-orange animate-pulse opacity-50"></div>
         </div>
       </div>
     );
@@ -146,28 +146,28 @@ const CategoriesPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-white">Categories</h1>
-          <p className="text-slate-400 mt-1">Manage your product categories</p>
+          <h1 className="text-2xl font-bold text-text-primary">Categories</h1>
+          <p className="text-text-muted mt-1">Manage your product categories</p>
         </div>
-        <div className="text-sm text-slate-400">
-          Total: <span className="text-white font-semibold">{categories.length}</span> categories
+        <div className="text-sm text-text-muted">
+          Total: <span className="text-text-primary font-semibold">{categories.length}</span> categories
         </div>
       </div>
 
       {/* Add Category */}
-      <div className="bg-slate-800 rounded-xl shadow-lg p-6 border border-slate-700">
-        <h2 className="text-lg font-semibold text-white mb-4">Add New Category</h2>
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-divider">
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Add New Category</h2>
         <div className="flex flex-col md:flex-row gap-3">
           <input
             type="text"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             placeholder="Enter category name"
-            className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 px-4 py-2.5 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
           />
           <button
             onClick={handleAddCategory}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center gap-2 font-medium"
+            className="bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white px-6 py-2.5 rounded-lg hover:from-brand-orange-dark hover:to-brand-orange transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <span className="text-lg">+</span> Add Category
           </button>
@@ -175,29 +175,29 @@ const CategoriesPage = () => {
       </div>
 
       {/* Categories Table */}
-      <div className="bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-slate-700">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-divider">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-700">
-            <thead className="bg-slate-900">
+            <thead className="bg-surface-primary">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Icon</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Category Name</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Products</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Icon</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Category Name</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Products</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-slate-800 divide-y divide-slate-700">
+            <tbody className="bg-white divide-y divide-slate-700">
               {categories.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
-                    <div className="text-5xl mb-2">🏷️</div>
+                  <td colSpan="4" className="px-6 py-12 text-center text-text-muted">
+                    <div className="text-5xl mb-2">ðŸ·ï¸</div>
                     <p>No categories found</p>
                     <p className="text-sm mt-1">Click "Add Category" to create your first category</p>
                   </td>
                 </tr>
               ) : (
                 categories.map((category) => (
-                  <tr key={category._id} className="hover:bg-slate-700/50 transition-colors">
+                  <tr key={category._id} className="hover:bg-brand-light/50 transition-colors">
                     {editingCategory?._id === category._id ? (
                       // Edit Mode
                       <>
@@ -205,7 +205,7 @@ const CategoriesPage = () => {
                           <select
                             value={editIcon}
                             onChange={(e) => setEditIcon(e.target.value)}
-                            className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
+                            className="px-2 py-1 bg-surface-primary border border-divider rounded-lg text-text-primary focus:ring-2 focus:ring-brand-orange"
                           >
                             {iconOptions.map(option => (
                               <option key={option.icon} value={option.icon}>
@@ -219,11 +219,11 @@ const CategoriesPage = () => {
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="px-3 py-1 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-3 py-1 bg-surface-primary border border-divider rounded-lg text-text-primary focus:ring-2 focus:ring-brand-orange focus:border-transparent"
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-slate-400">{category.productCount || 0}</span>
+                          <span className="text-text-muted">{category.productCount || 0}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ const CategoriesPage = () => {
                             </button>
                             <button
                               onClick={handleCancelEdit}
-                              className="text-slate-400 hover:text-white transition-colors p-1"
+                              className="text-text-muted hover:text-white transition-colors p-1"
                               title="Cancel"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,21 +252,21 @@ const CategoriesPage = () => {
                       // View Mode
                       <>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-2xl">{category.icon || '📦'}</span>
+                          <span className="text-2xl">{category.icon || 'ðŸ“¦'}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="font-medium text-white">{category.name}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full border border-blue-500/30">
-                            📦 {category.productCount || 0}
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-light0/20 text-brand-orange text-xs font-medium rounded-full border border-brand-orange/20">
+                            ðŸ“¦ {category.productCount || 0}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEditCategory(category)}
-                              className="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                              className="text-brand-orange hover:text-brand-orange-dark transition-colors p-1"
                               title="Edit Category"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react'
 import axios from 'axios'
 
-const API_URL = 'http://localhost:5000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 export const AuthContext = createContext(null)
 
@@ -72,6 +72,56 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Admin panel login — only admin role allowed
+  const adminLogin = async (email, password) => {
+    try {
+      const response = await axios.post(`${API_URL}/auth/admin/login`, {
+        email,
+        password
+      })
+
+      const { token, user } = response.data
+
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      setToken(token)
+      setUser(user)
+      setIsAuthenticated(true)
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
+      return { success: true, user }
+    } catch (error) {
+      console.error('Admin login error:', error.response?.data || error.message)
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Admin login failed'
+      }
+    }
+  }
+
+  const verifyAdmin = useCallback(async () => {
+    const storedToken = token || localStorage.getItem('token')
+    if (!storedToken) return { isAdmin: false }
+
+    try {
+      const response = await axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${storedToken}` }
+      })
+      const serverUser = response.data?.user
+      if (!serverUser || serverUser.role !== 'admin') {
+        return { isAdmin: false }
+      }
+
+      localStorage.setItem('user', JSON.stringify(serverUser))
+      setUser(serverUser)
+      setIsAuthenticated(true)
+      return { isAdmin: true, user: serverUser }
+    } catch {
+      return { isAdmin: false }
+    }
+  }, [token])
+
   // Register function
   const register = async (name, email, password) => {
     try {
@@ -101,20 +151,14 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Logout function - FIXED (removed API call)
-  const logout = () => {
-    // Clear local storage
+  const logout = useCallback(() => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    
-    // Clear state
     setToken(null)
     setUser(null)
     setIsAuthenticated(false)
-    
-    // Remove axios default header
     delete axios.defaults.headers.common['Authorization']
-  }
+  }, [])
 
   const value = {
     user,
@@ -122,6 +166,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     loading,
     login,
+    adminLogin,
+    verifyAdmin,
     register,
     logout
   }

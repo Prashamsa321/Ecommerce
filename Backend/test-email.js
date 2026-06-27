@@ -1,22 +1,12 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-dotenv.config();
+import { verifyEmailConfig } from './services/emailService.js'
 
-const testEmail = async () => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+const result = await verifyEmailConfig()
 
-  try {
-    await transporter.verify();
-    console.log('Email configuration is working!');
-  } catch (error) {
-    console.error('Email configuration error:', error.message);
-  }
-};
+if (result.ok) {
+  console.log('Email is configured correctly.')
+  process.exit(0)
+}
 
-testEmail();
+console.error('Email is NOT working:', result.reason || 'unknown')
+if (result.error) console.error(result.error)
+process.exit(1)

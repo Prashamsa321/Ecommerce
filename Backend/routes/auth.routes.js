@@ -1,8 +1,9 @@
 import express from 'express';
-import { protect } from '../middleware/auth.middleware.js';
+import { protect, adminOnly } from '../middleware/auth.middleware.js';
 import { 
   register, 
-  login, 
+  login,
+  adminLogin,
   getMe,
   updateProfile,
   changePassword,
@@ -16,6 +17,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/admin/login', adminLogin);
 
 // Protected routes (require authentication)
 router.get('/me', protect, getMe);
@@ -23,11 +25,8 @@ router.put('/updateprofile', protect, updateProfile);
 router.put('/change-password', protect, changePassword);  // Change password endpoint
 
 // Admin only routes
-router.get('/users', protect, async (req, res) => {
+router.get('/users', protect, adminOnly, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Admin only' });
-    }
     const users = await User.find({}).select('-password');
     res.status(200).json({ success: true, users });
   } catch (error) {
@@ -35,7 +34,7 @@ router.get('/users', protect, async (req, res) => {
   }
 });
 
-router.put('/users/:id/role', protect, updateUserRole);
-router.delete('/users/:id', protect, deleteUser);
+router.put('/users/:id/role', protect, adminOnly, updateUserRole);
+router.delete('/users/:id', protect, adminOnly, deleteUser);
 
 export default router;

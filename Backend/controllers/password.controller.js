@@ -29,23 +29,27 @@ export const forgotPassword = async (req, res) => {
 
     // Generate OTP
     const otp = generateOTP();
+    console.log(`Password reset OTP for ${email}: ${otp}`);
 
     // Save OTP to user document
     user.resetPasswordOTP = otp;
-    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); 
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save();
 
-    // Send OTP email
-    let emailSent = false;
-    try {
-      emailSent = await sendPasswordResetOTP(email, otp, user.name);
-    } catch (err) {
-      console.log('Email sending failed:', err.message);
-    }
+    const emailResult = await sendPasswordResetOTP(email, otp, user.name);
 
     res.status(200).json({
       success: true,
-      message: 'Password reset OTP sent to your email',
+      message: emailResult.sent
+        ? 'Password reset OTP sent to your email'
+        : emailResult.previewUrl
+          ? 'Email preview ready — open the link below to view your OTP'
+          : process.env.NODE_ENV !== 'production'
+            ? 'OTP generated — use the code shown on screen'
+            : 'Could not send email. Check server email settings.',
+      emailSent: Boolean(emailResult.sent),
+      devOTP: process.env.NODE_ENV !== 'production' ? otp : undefined,
+      emailPreviewUrl: emailResult.previewUrl || undefined,
     });
   } catch (error) {
     console.error('Forgot password error:', error);

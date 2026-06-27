@@ -1,55 +1,54 @@
 import Product from '../models/Product.js'
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-// Get all products with pagination and filtering
+// Get products with pagination, search, and category filter
 export const getAllProducts = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || '';
-    const category = req.query.category || '';
-    
-    const skip = (page - 1) * limit;
-    
-    // Build filter
-    let filter = {};
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 12))
+    const search = (req.query.search || '').trim()
+    const category = (req.query.category || '').trim()
+
+    const filter = {}
+
     if (category) {
-      filter.category = category;
+      filter.category = { $regex: new RegExp(`^${escapeRegex(category)}$`, 'i') }
     }
-    
-    // Get total count for pagination
-    const totalProducts = await Product.countDocuments(filter);
-    
-    // Get paginated products
+
+    if (search) {
+      const searchRegex = { $regex: escapeRegex(search), $options: 'i' }
+      filter.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { category: searchRegex },
+      ]
+    }
+
+    const total = await Product.countDocuments(filter)
     const products = await Product.find(filter)
-      .skip(skip)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
       .limit(limit)
-      .sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       success: true,
-      products: products,
-      totalProducts: totalProducts,  // This is the total count
-      currentPage: page,
-      totalPages: Math.ceil(totalProducts / limit),
-      hasNextPage: page < Math.ceil(totalProducts / limit),
-      hasPrevPage: page > 1
-    });
+      count: products.length,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      products,
+    })
   } catch (error) {
-    console.error('Get products error:', error);
+    console.error('Get products error:', error)
     res.status(500).json({
       success: false,
       message: 'Error fetching products',
       error: error.message
-    });
+    })
   }
-};
+}
 
 // Get single product
 export const getProductById = async (req, res) => {

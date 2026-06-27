@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../middleware/auth.middleware.js';
+import { protect, adminOnly } from '../middleware/auth.middleware.js';
 import {
   createOrder,
   getAllOrders,
@@ -18,9 +18,9 @@ router.get('/my-orders', protect, getUserOrders);
 router.get('/:id', protect, getOrderById);
 
 // Admin only routes
-router.get('/admin/all', protect, getAllOrders);
-router.get('/admin/stats', protect, getOrderStats);
-router.put('/admin/:id/status', protect, updateOrderStatus);
-router.delete('/admin/:id', protect, deleteOrder);
+router.get('/admin/all', protect, adminOnly, getAllOrders);
+router.get('/admin/stats', protect, adminOnly, getOrderStats);
+router.put('/admin/:id/status', protect, adminOnly, updateOrderStatus);
+router.delete('/admin/:id', protect, adminOnly, deleteOrder);
 
 export default router;

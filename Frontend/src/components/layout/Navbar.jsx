@@ -1,596 +1,415 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Search, ShoppingCart, User, Menu, X,
+  ChevronDown, Smartphone, Laptop, Headphones, Watch, Gamepad2,
+  Camera, Tablet, Speaker, Cpu, Home as HomeIcon, Grid3X3
+} from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
-import CartIcon from '../cart/CartIcon'
-import TopAnnouncementBar from './TopAnnouncementBar'
-import CategoriesDropdown from './CategoriesDropdown'
+import { productService } from '../../services/productService'
+
+const CATEGORIES = [
+  { name: 'Smartphones', icon: Smartphone, slug: 'Smartphones' },
+  { name: 'Laptops', icon: Laptop, slug: 'Laptops' },
+  { name: 'Tablets', icon: Tablet, slug: 'Tablets' },
+  { name: 'Headphones', icon: Headphones, slug: 'Headphones' },
+  { name: 'Smart Watches', icon: Watch, slug: 'Smart Watches' },
+  { name: 'Gaming', icon: Gamepad2, slug: 'Gaming' },
+  { name: 'Cameras', icon: Camera, slug: 'Cameras' },
+  { name: 'Audio', icon: Speaker, slug: 'Audio' },
+  { name: 'Accessories', icon: Cpu, slug: 'Accessories' },
+]
+
+const navLinkClass = (active) =>
+  active
+    ? 'nav-link-active'
+    : 'px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand-orange rounded-xl hover:bg-brand-light transition-all'
+
 const Navbar = () => {
   const { user, logout } = useAuth()
-  const { getCartCount, fetchCart } = useCart()
+  const { getCartCount } = useCart()
   const navigate = useNavigate()
   const location = useLocation()
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const dropdownRef = useRef(null)
-  const mobileMenuRef = useRef(null)
+  const [megaOpen, setMegaOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const searchRef = useRef(null)
+  const mobileSearchRef = useRef(null)
+  const searchToggleRef = useRef(null)
+  const profileRef = useRef(null)
 
-  // Add scroll effect for glass morphism
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setIsScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false)
-      }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
-        setIsMobileMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    setMobileOpen(false)
+    setMegaOpen(false)
+    setProfileOpen(false)
+    setMobileSearchOpen(false)
+    setShowSuggestions(false)
+  }, [location.pathname, location.search])
 
   useEffect(() => {
-    setIsMobileMenuOpen(false)
-  }, [location])
-
-  const handleLogout = async (e) => {
-    e.preventDefault()
-  
-    try {
-      setIsDropdownOpen(false)
-      setIsMobileMenuOpen(false)
-      
-      logout()
-      
-      // Navigate to login page
-      navigate('/login')
-    } catch (error) {
-      console.error('Logout error:', error)
-      navigate('/login')
+    const params = new URLSearchParams(location.search)
+    const q = params.get('search')
+    if (location.pathname === '/products' && q) {
+      setSearchQuery(q)
+    } else if (location.pathname !== '/products') {
+      setSearchQuery('')
     }
+  }, [location.pathname, location.search])
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([])
+      return
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const { products } = await productService.getProducts({
+          search: searchQuery.trim(),
+          limit: 6,
+          page: 1,
+        })
+        setSuggestions(products)
+      } catch {
+        setSuggestions([])
+      }
+    }, 200)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false)
+      const inSearch =
+        searchRef.current?.contains(e.target) ||
+        mobileSearchRef.current?.contains(e.target) ||
+        searchToggleRef.current?.contains(e.target)
+      if (!inSearch) {
+        setShowSuggestions(false)
+        setMobileSearchOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  if (location.pathname.startsWith('/admin')) return null
+
+  const handleLogout = () => {
+    logout()
+    setProfileOpen(false)
+    navigate('/login')
   }
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen)
+  const handleSearch = (e) => {
+    e?.preventDefault?.()
+    const query = searchQuery.trim()
+    if (!query) return
+    navigate(`/products?search=${encodeURIComponent(query)}`)
+    setShowSuggestions(false)
+    setMobileSearchOpen(false)
   }
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
+  const goToSearchResults = (query) => {
+    const q = (query || searchQuery).trim()
+    if (!q) return
+    navigate(`/products?search=${encodeURIComponent(q)}`)
+    setShowSuggestions(false)
+    setMobileSearchOpen(false)
+    setSearchQuery(q)
   }
 
-  // Don't show navbar on admin routes
-  if (location.pathname.startsWith('/admin')) {
-    return null
+  const goToProduct = (id) => {
+    navigate(`/products/${id}`)
+    setShowSuggestions(false)
+    setMobileSearchOpen(false)
+    setSearchQuery('')
   }
+
+  const renderSuggestions = (onViewAll) =>
+    showSuggestions && searchQuery.trim() && (
+      <div className="absolute top-full left-0 right-0 mt-2 glass rounded-2xl overflow-hidden border border-divider shadow-card z-50">
+        {suggestions.length > 0 ? (
+          suggestions.map((p) => (
+            <button
+              key={p._id}
+              type="button"
+              onClick={() => goToProduct(p._id)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-brand-light text-left transition-colors"
+            >
+              {p.images?.[0] && (
+                <img src={p.images[0]} alt="" className="w-8 h-8 rounded-lg object-cover" />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm text-text-primary line-clamp-1">{p.name}</p>
+                <p className="text-xs text-brand-orange font-medium">रु {p.price?.toLocaleString()}</p>
+              </div>
+            </button>
+          ))
+        ) : (
+          <p className="px-4 py-3 text-sm text-text-muted">No matching products</p>
+        )}
+        <button
+          type="button"
+          onClick={onViewAll}
+          className="w-full px-4 py-3 text-sm font-semibold text-brand-orange hover:bg-brand-light border-t border-divider text-left"
+        >
+          View all results for &quot;{searchQuery.trim()}&quot;
+        </button>
+      </div>
+    )
+
+  const isActive = (path) => location.pathname === path
 
   return (
     <>
-      {/* Top Announcement Bar - Added above navbar */}
-      <TopAnnouncementBar />
-      
-      <nav
-        className={` sticky top-0 z-50 transition-all duration-500 ${isScrolled
-            ? 'backdrop-blur-xl shadow-lg'
-            : 'backdrop-blur-sm'
-          }`}
-        style={{
-          backgroundColor: isScrolled
-            ? 'var(--nav-scrolled-bg)'
-            : 'var(--nav-bg)',
-          borderBottom: isScrolled
-            ? 'var(--nav-border-scrolled)'
-            : 'var(--nav-border)',
-          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
+      <div className="bg-gradient-promo text-white text-center text-xs sm:text-sm py-2 px-4 font-medium">
+        Free shipping on orders over रु5,000 · New arrivals every week
+      </div>
+
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled ? 'glass-strong shadow-soft' : 'bg-white/90 backdrop-blur-sm border-b border-divider'
+        }`}
       >
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex justify-between items-center h-14">
-            {/* Logo Section */}
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className=' '>
-                <img src="./logo3.png" alt="MeroGadget" className='h-20 w-30 ' />
+        <div className="section-container">
+          <div className="flex items-center justify-between h-16 lg:h-[72px] gap-4">
+            <Link to="/" className="flex items-center gap-2 shrink-0 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-cta flex items-center justify-center shadow-glow-orange group-hover:scale-105 transition-transform">
+                <span className="text-white font-bold text-sm">MG</span>
               </div>
+              <span className="hidden sm:block text-xl font-bold tracking-tight text-text-primary">
+                Mero<span className="text-brand-orange">Gadget</span>
+              </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
-              <Link to="/" className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--text-primary)'
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >Home</Link>
-              <Link
-                to="/products"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--text-primary)'
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+            <nav className="hidden lg:flex items-center gap-1">
+              <Link to="/" className={navLinkClass(isActive('/'))}>Home</Link>
+              <div
+                className="relative"
+                onMouseEnter={() => setMegaOpen(true)}
+                onMouseLeave={() => setMegaOpen(false)}
               >
-                Products
-              </Link>
-              <CategoriesDropdown />
-
-              <Link to="/about"
-                 className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                 style={{
-                   color: 'var(--text-secondary)',
-                   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                 }}
-                 onMouseEnter={(e) => {
-                   e.currentTarget.style.color = 'var(--text-primary)'
-                   e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                 }}
-                 onMouseLeave={(e) => {
-                   e.currentTarget.style.color = 'var(--text-secondary)'
-                   e.currentTarget.style.backgroundColor = 'transparent'
-                 }} >About Us</Link>
-
-
-              <Link to="/contact"
-               className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-               style={{
-                 color: 'var(--text-secondary)',
-                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-               }}
-               onMouseEnter={(e) => {
-                 e.currentTarget.style.color = 'var(--text-primary)'
-                 e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-               }}
-               onMouseLeave={(e) => {
-                 e.currentTarget.style.color = 'var(--text-secondary)'
-                 e.currentTarget.style.backgroundColor = 'transparent'
-               }}>Contact</Link>
-
-              {/* Cart Icon */}
-              {user?.role !== 'admin' && (
-                <Link
-                  to="/cart"
-                  className="relative p-2 rounded-lg transition-all duration-300 hover:scale-110"
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <CartIcon />
-                  {getCartCount() > 0 && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-lg"
-                      style={{
-                        background: 'var(--accent-orange)',
-                        boxShadow: 'var(--cart-badge-shadow)'
-                      }}
+                <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand-orange rounded-xl hover:bg-brand-light transition-all">
+                  Categories <ChevronDown size={14} className={`transition-transform ${megaOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {megaOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 w-[520px] glass rounded-2xl p-6 shadow-card border border-divider"
                     >
-                      {getCartCount()}
-                    </span>
-                  )}
-                </Link>
-              )}
-
-              {user ? (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={toggleDropdown}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg focus:outline-none transition-all duration-300"
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white font-semibold text-xs shadow-lg ring-2 ring-offset-1 ring-offset-transparent transition-transform duration-300 group-hover:scale-110"
-                      style={{
-                        background: 'var(--avatar-gradient)',
-                        ringColor: 'rgba(255, 255, 255, 0.1)'
-                      }}
-                    >
-                      {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-                    </div>
-                    <span
-                      className="hidden lg:inline text-sm font-medium"
-                      style={{
-                        color: 'var(--text-primary)',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                      }}
-                    >
-                      {user.name?.split(' ')[0] || user.email?.split('@')[0]}
-                    </span>
-                  </button>
-
-                  {isDropdownOpen && (
-                    <div
-                      className="absolute right-0 mt-1 w-64 rounded-2xl shadow-2xl py-2 z-10 border animate-scale-in overflow-hidden"
-                      style={{
-                        backgroundColor: 'var(--dropdown-bg)',
-                        borderColor: 'var(--dropdown-border)',
-                        backdropFilter: 'blur(40px)',
-                        boxShadow: 'var(--dropdown-shadow)'
-                      }}
-                    >
-                      {/* User Info Header */}
-                      <div
-                        className="px-5 py-4 border-b"
-                        style={{ borderColor: 'var(--divider-color)' }}
-                      >
-                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                          {user.name}
-                        </p>
-                        <p className="text-xs truncate mt-1" style={{ color: 'var(--text-secondary)' }}>
-                          {user.email}
-                        </p>
-                      </div>
-
-                      <div className="py-1">
-                        {/* Profile Link */}
-                        <Link
-                          to="/profile"
-                          onClick={() => setIsDropdownOpen(false)}
-                          className="flex items-center gap-3 px-5 py-2.5 text-sm transition-all duration-200 mx-2 rounded-lg"
-                          style={{ color: 'var(--text-primary)' }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                            e.currentTarget.style.color = 'var(--accent-cyan)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent'
-                            e.currentTarget.style.color = 'var(--text-primary)'
-                          }}
-                        >
-                          <span>👤</span>
-                          Profile
-                        </Link>
-
-                        {/* Admin Dashboard Link */}
-                        {user.role === 'admin' && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {CATEGORIES.map(({ name, icon: Icon, slug }) => (
                           <Link
-                            to="/admin"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="flex items-center gap-3 px-5 py-2.5 text-sm transition-all duration-200 mx-2 rounded-lg font-medium"
-                            style={{ color: 'var(--accent-cyan)' }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = 'var(--cyan-hover-bg)'
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent'
-                            }}
+                            key={slug}
+                            to={`/products?category=${encodeURIComponent(slug)}`}
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-brand-light group transition-all"
                           >
-                            <span>📊</span>
-                            Admin Dashboard
+                            <div className="w-9 h-9 rounded-lg bg-brand-light flex items-center justify-center group-hover:bg-brand-orange/10 transition-colors">
+                              <Icon size={16} className="text-brand-orange" />
+                            </div>
+                            <span className="text-sm text-text-secondary group-hover:text-brand-orange">{name}</span>
                           </Link>
-                        )}
-
-                        {/* Divider */}
-                        <div className="mx-4 my-1" style={{ borderTop: 'var(--divider-border)' }}></div>
-
-                        {/* Logout Button */}
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-3 w-full text-left px-5 py-2.5 text-sm transition-all duration-200 mx-2 rounded-lg"
-                          style={{ color: 'var(--error-red)' }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'var(--error-hover-bg)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent'
-                          }}
-                        >
-                          <span>🚪</span>
-                          Logout
-                        </button>
+                        ))}
                       </div>
-                    </div>
+                      <div className="mt-4 pt-4 border-t border-divider">
+                        <Link to="/products" className="text-sm text-brand-orange hover:text-brand-orange-dark transition-colors font-medium">
+                          View all products →
+                        </Link>
+                      </div>
+                    </motion.div>
                   )}
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300"
-                    style={{
-                      color: 'var(--text-secondary)',
-                      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = 'var(--text-primary)'
-                      e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'var(--text-secondary)'
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 hover:scale-105"
-                    style={{
-                      background: 'var(--accent-orange)',
-                      color: 'var(--white)',
-                      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
-                      boxShadow: 'var(--register-btn-shadow)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--accent-orange-hover)'
-                      e.currentTarget.style.boxShadow = 'var(--register-btn-shadow-hover)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'var(--accent-orange)'
-                      e.currentTarget.style.boxShadow = 'var(--register-btn-shadow)'
-                    }}
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
+                </AnimatePresence>
+              </div>
+              <Link to="/products" className={navLinkClass(isActive('/products'))}>Shop</Link>
+              <Link to="/about" className={navLinkClass(isActive('/about'))}>About</Link>
+              <Link to="/contact" className={navLinkClass(isActive('/contact'))}>Contact</Link>
+            </nav>
+
+            <div className="hidden md:flex flex-1 max-w-md mx-4" ref={searchRef}>
+              <form onSubmit={handleSearch} className="relative w-full">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                <input
+                  type="search"
+                  placeholder="Search electronics..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true) }}
+                  onFocus={() => setShowSuggestions(true)}
+                  aria-label="Search products"
+                  className="w-full pl-11 pr-12 py-2.5 bg-surface-primary border border-divider rounded-2xl text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all"
+                />
+                <button
+                  type="submit"
+                  aria-label="Search products"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all"
+                >
+                  <Search size={16} />
+                </button>
+                {renderSuggestions(() => goToSearchResults())}
+              </form>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="md:hidden flex items-center space-x-2">
-              {user?.role !== 'admin' && (
-                <Link
-                  to="/cart"
-                  className="relative p-2 rounded-lg transition-all duration-300"
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                ref={searchToggleRef}
+                onClick={() => {
+                  setMobileSearchOpen((open) => {
+                    if (!open) setShowSuggestions(true)
+                    return !open
+                  })
+                }}
+                className="md:hidden p-2.5 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all"
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+              <Link to="/cart" className="p-2.5 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all relative">
+                <ShoppingCart size={20} />
+                {getCartCount() > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-brand-orange text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {getCartCount() > 9 ? '9+' : getCartCount()}
+                  </span>
+                )}
+              </Link>
+
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2 p-1.5 pr-3 rounded-2xl hover:bg-brand-light transition-all border border-transparent hover:border-divider"
                 >
-                  <CartIcon />
-                  {getCartCount() > 0 && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-lg"
-                      style={{
-                        background: 'var(--accent-orange)',
-                        boxShadow: 'var(--cart-badge-shadow)'
-                      }}
+                  <div className="w-8 h-8 rounded-xl bg-gradient-cta flex items-center justify-center">
+                    <User size={16} className="text-white" />
+                  </div>
+                  {user && <span className="hidden lg:block text-sm font-medium text-text-secondary max-w-[80px] truncate">{user.name?.split(' ')[0]}</span>}
+                </button>
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-56 glass rounded-2xl overflow-hidden border border-divider shadow-card z-50"
                     >
-                      {getCartCount()}
-                    </span>
+                      {user ? (
+                        <>
+                          <div className="px-4 py-3 border-b border-divider">
+                            <p className="text-sm font-semibold text-text-primary truncate">{user.name}</p>
+                            <p className="text-xs text-text-muted truncate">{user.email}</p>
+                          </div>
+                          {user.role === 'admin' ? (
+                            <Link to="/admin" className="block px-4 py-3 text-sm text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-colors">Admin Panel</Link>
+                          ) : (
+                            <Link to="/profile" className="block px-4 py-3 text-sm text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-colors">My Dashboard</Link>
+                          )}
+                          <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-sm text-status-error hover:bg-red-50 transition-colors">Sign Out</button>
+                        </>
+                      ) : (
+                        <>
+                          <Link to="/login" className="block px-4 py-3 text-sm text-text-secondary hover:text-brand-orange hover:bg-brand-light">Sign In</Link>
+                          <Link to="/register" className="block px-4 py-3 text-sm text-brand-orange hover:bg-brand-light font-medium">Create Account</Link>
+                        </>
+                      )}
+                    </motion.div>
                   )}
-                </Link>
-              )}
+                </AnimatePresence>
+              </div>
 
               <button
-                onClick={toggleMobileMenu}
-                className="p-2 rounded-lg transition-all duration-200"
-                style={{ color: 'var(--text-primary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="lg:hidden p-2.5 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light"
+                aria-label="Menu"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {isMobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
+                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
           </div>
-
-          {/* Mobile Menu Dropdown */}
-          {isMobileMenuOpen && (
-            <div
-              ref={mobileMenuRef}
-              className="md:hidden py-4 space-y-1 animate-slide-down rounded-b-2xl shadow-2xl border-t"
-              style={{
-                backgroundColor: 'var(--mobile-menu-bg)',
-                borderColor: 'var(--dropdown-border)',
-                backdropFilter: 'blur(40px)'
-              }}
-            >
-              <Link
-                to="/products"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-5 py-3 text-sm font-medium transition-all duration-200 rounded-xl mx-3"
-                style={{ color: 'var(--text-primary)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                <span className="text-base">📦</span>
-                Products
-              </Link>
-
-              {user?.role === 'admin' && (
-                <Link
-                  to="/admin"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3 text-sm font-medium rounded-xl mx-3 transition-all duration-200"
-                  style={{
-                    background: 'var(--admin-gradient)',
-                    color: 'var(--white)',
-                    boxShadow: 'var(--admin-btn-shadow)'
-                  }}
-                >
-                  <span className="text-base">📊</span>
-                  Admin Dashboard
-                </Link>
-              )}
-
-              <div className="mx-4 my-2" style={{ borderTop: 'var(--divider-border)' }}></div>
-
-              {user ? (
-                <>
-                  <div
-                    className="px-5 py-3 mx-3 rounded-xl"
-                    style={{ backgroundColor: 'var(--mobile-user-bg)' }}
-                  >
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {user.name}
-                    </p>
-                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                      {user.email}
-                    </p>
-                  </div>
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3 text-sm transition-all duration-200 rounded-xl mx-3"
-                    style={{ color: 'var(--text-primary)' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <span className="text-base">👤</span>
-                    Profile
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm transition-all duration-200 rounded-xl mx-3 font-medium"
-                    style={{ color: 'var(--error-red)' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--error-hover-bg)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <span className="text-base">🚪</span>
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3 text-sm transition-all duration-200 rounded-xl mx-3"
-                    style={{ color: 'var(--text-primary)' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <span className="text-base">🔐</span>
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3 text-sm font-medium rounded-xl mx-3 transition-all duration-200"
-                    style={{
-                      background: 'var(--accent-orange)',
-                      color: 'var(--white)',
-                      boxShadow: 'var(--register-btn-shadow)'
-                    }}
-                  >
-                    <span className="text-base">📝</span>
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-          )}
         </div>
 
-        <style>{`
-          :root {
-            /* Primary Colors - Deep Navy */
-            --nav-bg: rgba(10, 37, 64, 0.92);
-            --nav-scrolled-bg: rgba(10, 37, 64, 0.85);
-            --nav-border: 0.5px solid rgba(34, 211, 238, 0.08);
-            --nav-border-scrolled: 0.5px solid rgba(34, 211, 238, 0.12);
-            
-            /* Text Colors */
-            --text-primary: #FFFFFF;
-            --text-secondary: #A1A1A6;
-            
-            /* Accent Colors */
-            --accent-orange: #FF6200;
-            --accent-orange-hover: #E05500;
-            --accent-cyan: #22D3EE;
-            
-            /* Background Colors - Neutral Dark Gray */
-            --hover-bg: rgba(255, 255, 255, 0.05);
-            --dropdown-bg: #111827;
-            --mobile-menu-bg: #111827;
-            --mobile-user-bg: rgba(255, 255, 255, 0.03);
-            
-            /* Border Colors */
-            --dropdown-border: rgba(34, 211, 238, 0.15);
-            --divider-color: rgba(34, 211, 238, 0.08);
-            --divider-border: 0.5px solid rgba(34, 211, 238, 0.08);
-            
-            /* Shadows */
-            --cart-badge-shadow: 0 2px 8px rgba(255, 98, 0, 0.4);
-            --dropdown-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            --register-btn-shadow: 0 2px 8px rgba(255, 98, 0, 0.3);
-            --register-btn-shadow-hover: 0 4px 12px rgba(255, 98, 0, 0.4);
-            --admin-btn-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
-            
-            /* Gradients */
-            --avatar-gradient: linear-gradient(135deg, #1E3A8A, #22D3EE);
-            --admin-gradient: linear-gradient(135deg, #1E3A8A, #22D3EE);
-            
-            /* Utility Colors */
-            --white: #FFFFFF;
-            --error-red: #FF3B30;
-            --error-hover-bg: rgba(255, 59, 48, 0.08);
-            --cyan-hover-bg: rgba(34, 211, 238, 0.08);
-          }
-          
-          @keyframes scale-in {
-            from {
-              opacity: 0;
-              transform: scale(0.95) translateY(-8px);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1) translateY(0);
-            }
-          }
-          
-          @keyframes slide-down {
-            from {
-              opacity: 0;
-              transform: translateY(-16px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          
-          .animate-scale-in {
-            animation: scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-          
-          .animate-slide-down {
-            animation: slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-        `}</style>
-      </nav>
+        <AnimatePresence>
+          {mobileSearchOpen && (
+            <motion.div
+              ref={mobileSearchRef}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden overflow-hidden border-t border-divider"
+            >
+              <form onSubmit={handleSearch} className="section-container py-3">
+                <div className="relative flex gap-2">
+                  <div className="relative flex-1">
+                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    <input
+                      type="search"
+                      placeholder="Search electronics..."
+                      value={searchQuery}
+                      onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true) }}
+                      onFocus={() => setShowSuggestions(true)}
+                      aria-label="Search products"
+                      className="input-field pl-11 w-full"
+                      autoFocus
+                    />
+                    {renderSuggestions(() => goToSearchResults())}
+                  </div>
+                  <button type="submit" className="btn-cta px-4 py-2.5 shrink-0">
+                    Search
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="lg:hidden overflow-hidden glass-strong border-t border-divider"
+            >
+              <div className="section-container py-4 space-y-1">
+                {[
+                  { to: '/', label: 'Home' },
+                  { to: '/products', label: 'Shop All' },
+                  { to: '/about', label: 'About' },
+                  { to: '/contact', label: 'Contact' },
+                ].map(({ to, label }) => (
+                  <Link key={to} to={to} className={`block px-4 py-3 rounded-xl transition-all font-medium ${isActive(to) ? 'nav-link-active' : 'text-text-secondary hover:text-brand-orange hover:bg-brand-light'}`}>
+                    {label}
+                  </Link>
+                ))}
+                <div className="pt-2 border-t border-divider">
+                  <p className="px-4 py-2 text-xs text-text-muted uppercase tracking-wider">Categories</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    {CATEGORIES.slice(0, 6).map(({ name, slug }) => (
+                      <Link key={slug} to={`/products?category=${encodeURIComponent(slug)}`} className="px-4 py-2.5 text-sm text-text-secondary hover:text-brand-orange hover:bg-brand-light rounded-xl">
+                        {name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
     </>
   )
 }

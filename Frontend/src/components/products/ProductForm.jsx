@@ -38,7 +38,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Product Name
         </label>
         <input
@@ -46,13 +46,13 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-[#0A2540] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+          className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Price
         </label>
         <input
@@ -60,7 +60,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           name="price"
           value={formData.price}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-[#0A2540] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+          className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
           required
           min="0"
           step="0.01"
@@ -68,21 +68,21 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Description
         </label>
         <textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-[#0A2540] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300 resize-none"
+          className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300 resize-none"
           rows="4"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Image URL
         </label>
         <input
@@ -90,13 +90,13 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           name="image"
           value={formData.image}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-[#0A2540] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+          className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Category
         </label>
         <input
@@ -104,13 +104,13 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           name="category"
           value={formData.category}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-[#0A2540] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+          className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-text-secondary mb-2">
           Stock Quantity
         </label>
         <input
@@ -118,7 +118,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           name="countInStock"
           value={formData.countInStock}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-[#0A2540] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+          className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
           required
           min="0"
         />
@@ -127,7 +127,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gradient-to-r from-[#FF6200] to-[#FF3D00] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+        className="w-full bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">

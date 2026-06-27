@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { contactService } from '../services/contactService';
 import { useToast } from '../context/ToastContext';
-import { useAuth } from '../context/AuthContext';
 
 function ContactPage() {
-  const { user } = useAuth();
   const { success, error: toastError } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -16,21 +14,6 @@ function ContactPage() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
-
-  // Check if user is admin
-  const isAdmin = user?.role === 'admin';
-
-  // Pre-fill form with admin data if admin is viewing
-  React.useEffect(() => {
-    if (isAdmin && user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        subject: '',
-        message: '',
-      });
-    }
-  }, [isAdmin, user]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -76,12 +59,6 @@ function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Prevent admin from submitting
-    if (isAdmin) {
-      toastError('Admins cannot send contact messages. Please use the admin panel.');
-      return;
-    }
-    
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -99,8 +76,8 @@ function ContactPage() {
 
   const getInputClassName = (fieldName) => {
     const baseClasses = "w-full px-4 py-3 rounded-xl text-base outline-none transition-all duration-300 border";
-    const bgColor = "bg-[#0A2540]";
-    const textColor = "text-white";
+    const bgColor = "bg-surface-primary";
+    const textColor = "text-text-primary";
     const placeholderColor = "placeholder-gray-500";
     
     if (errors[fieldName]) {
@@ -108,55 +85,38 @@ function ContactPage() {
     }
     
     if (focusedField === fieldName) {
-      return `${baseClasses} ${bgColor} ${textColor} ${placeholderColor} border-[#FF6200] ring-2 ring-[#FF6200]/30 focus:border-[#FF6200]`;
+      return `${baseClasses} ${bgColor} ${textColor} ${placeholderColor} border-brand-orange ring-2 ring-brand-orange/30 focus:border-brand-orange`;
     }
     
-    return `${baseClasses} ${bgColor} ${textColor} ${placeholderColor} border-[#1E3A8A] hover:border-[#22D3EE] focus:border-[#FF6200] focus:ring-2 focus:ring-[#FF6200]/20`;
+    return `${baseClasses} ${bgColor} ${textColor} ${placeholderColor} border-divider hover:border-brand-orange focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/20`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A2540] via-[#0F172A] to-[#0A2540] py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-light via-brand-light to-white py-12 px-4">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E3A8A]/30 rounded-full border border-[#22D3EE]/30 mb-4 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-light/30 rounded-full border border-brand-orange/30 mb-4 backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22D3EE] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22D3EE]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange"></span>
             </span>
-            <span className="text-sm text-[#22D3EE] font-medium">Contact Us</span>
+            <span className="text-sm text-brand-orange font-medium">Contact Us</span>
           </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3">
-            Get in <span className="text-[#FF6200]">Touch</span>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-3">
+            Get in <span className="text-brand-orange">Touch</span>
           </h1>
-          <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto">
+          <p className="text-text-secondary text-base md:text-lg max-w-2xl mx-auto">
             Have questions? We'd love to hear from you. Our team is here to help.
           </p>
-          
-          {/* Admin Notice Banner */}
-          {isAdmin && (
-            <div className="mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 max-w-2xl mx-auto">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">👑</span>
-                <div className="text-left">
-                  <p className="text-amber-400 font-semibold">Admin View Mode</p>
-                  <p className="text-amber-400/70 text-sm">You are viewing as admin. Contact form submissions are disabled for admin accounts.</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Contact Form */}
-          <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-[#1E3A8A] shadow-xl">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-divider shadow-xl">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-2">Send us a Message</h2>
-              <p className="text-gray-400 text-sm">
-                {isAdmin 
-                  ? 'Admins can view the form but cannot submit messages.' 
-                  : 'Fill out the form below and we\'ll get back to you soon.'}
-              </p>
+              <h2 className="text-xl font-semibold text-text-primary mb-2">Send us a Message</h2>
+              <p className="text-text-muted text-sm">Fill out the form below and we'll get back to you soon.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -164,7 +124,7 @@ function ContactPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Name Field */}
                 <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                  <label className="block text-text-secondary text-sm font-medium mb-2">
                     Full Name <span className="text-[#FF3B30]">*</span>
                   </label>
                   <input
@@ -176,18 +136,17 @@ function ContactPage() {
                     onBlur={() => setFocusedField(null)}
                     placeholder="John Doe"
                     className={getInputClassName('name')}
-                    disabled={isAdmin}
                   />
                   {errors.name && (
                     <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                      <span>⚠️</span> {errors.name}
+                      <span>âš ï¸</span> {errors.name}
                     </p>
                   )}
                 </div>
 
                 {/* Email Field */}
                 <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                  <label className="block text-text-secondary text-sm font-medium mb-2">
                     Email Address <span className="text-[#FF3B30]">*</span>
                   </label>
                   <input
@@ -199,11 +158,10 @@ function ContactPage() {
                     onBlur={() => setFocusedField(null)}
                     placeholder="john@example.com"
                     className={getInputClassName('email')}
-                    disabled={isAdmin}
                   />
                   {errors.email && (
                     <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                      <span>⚠️</span> {errors.email}
+                      <span>âš ï¸</span> {errors.email}
                     </p>
                   )}
                 </div>
@@ -211,7 +169,7 @@ function ContactPage() {
 
               {/* Subject Field */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-text-secondary text-sm font-medium mb-2">
                   Subject <span className="text-[#FF3B30]">*</span>
                 </label>
                 <input
@@ -223,18 +181,17 @@ function ContactPage() {
                   onBlur={() => setFocusedField(null)}
                   placeholder="What's this about?"
                   className={getInputClassName('subject')}
-                  disabled={isAdmin}
                 />
                 {errors.subject && (
                   <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                    <span>⚠️</span> {errors.subject}
+                    <span>âš ï¸</span> {errors.subject}
                   </p>
                 )}
               </div>
 
               {/* Message Field */}
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-text-secondary text-sm font-medium mb-2">
                   Message <span className="text-[#FF3B30]">*</span>
                 </label>
                 <textarea
@@ -246,22 +203,19 @@ function ContactPage() {
                   placeholder="Your message here... (minimum 10 characters)"
                   rows="5"
                   className={`${getInputClassName('message')} resize-none`}
-                  disabled={isAdmin}
                 />
                 {errors.message && (
                   <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                    <span>⚠️</span> {errors.message}
+                    <span>âš ï¸</span> {errors.message}
                   </p>
                 )}
               </div>
 
-              {/* Submit Button - Disabled for admin */}
+              {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting || isAdmin}
-                className={`w-full bg-gradient-to-r from-[#FF6200] to-[#FF3D00] hover:from-[#FF3D00] hover:to-[#FF6200] disabled:bg-[#1E3A8A] disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 ${
-                  isAdmin ? 'opacity-70' : ''
-                }`}
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-brand-orange to-brand-orange-dark hover:from-[#FF3D00] hover:to-[brand-orange] disabled:bg-brand-light disabled:cursor-not-allowed text-text-primary font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
               >
                 {isSubmitting ? (
                   <>
@@ -270,13 +224,6 @@ function ContactPage() {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Sending...
-                  </>
-                ) : isAdmin ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    Admins Cannot Send Messages
                   </>
                 ) : (
                   <>
@@ -287,59 +234,52 @@ function ContactPage() {
                   </>
                 )}
               </button>
-
-              {/* Admin Notice below button */}
-              {isAdmin && (
-                <p className="text-center text-amber-400/70 text-xs mt-2">
-                  🔒 Admins cannot submit contact forms. Please use the admin panel for communications.
-                </p>
-              )}
             </form>
           </div>
 
           {/* Contact Info & Map */}
           <div className="space-y-6">
             {/* Contact Info Cards */}
-            <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#1E3A8A] shadow-xl">
-              <h2 className="text-xl font-semibold text-white mb-4">Contact Information</h2>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-divider shadow-xl">
+              <h2 className="text-xl font-semibold text-text-primary mb-4">Contact Information</h2>
               <div className="space-y-4">
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#1E3A8A]/30 transition-all duration-300">
-                  <div className="w-10 h-10 bg-[#FF6200]/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#FF6200]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-brand-light/30 transition-all duration-300">
+                  <div className="w-10 h-10 bg-brand-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs">Email Us</p>
-                    <a href="mailto:support@merogadget.com" className="text-white text-sm hover:text-[#22D3EE] transition-colors">
+                    <p className="text-text-muted text-xs">Email Us</p>
+                    <a href="mailto:support@merogadget.com" className="text-white text-sm hover:text-brand-orange transition-colors">
                       support@merogadget.com
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#1E3A8A]/30 transition-all duration-300">
-                  <div className="w-10 h-10 bg-[#FF6200]/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#FF6200]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-brand-light/30 transition-all duration-300">
+                  <div className="w-10 h-10 bg-brand-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs">Call Us</p>
-                    <a href="tel:+9779800000000" className="text-white text-sm hover:text-[#22D3EE] transition-colors">
+                    <p className="text-text-muted text-xs">Call Us</p>
+                    <a href="tel:+9779800000000" className="text-white text-sm hover:text-brand-orange transition-colors">
                       +977 9800000000
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#1E3A8A]/30 transition-all duration-300">
-                  <div className="w-10 h-10 bg-[#FF6200]/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-[#FF6200]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-brand-light/30 transition-all duration-300">
+                  <div className="w-10 h-10 bg-brand-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs">Visit Us</p>
+                    <p className="text-text-muted text-xs">Visit Us</p>
                     <p className="text-white text-sm">Hall Chowk, Kawasoti-7, Nawalpur, Nepal</p>
                   </div>
                 </div>
@@ -347,10 +287,10 @@ function ContactPage() {
             </div>
 
             {/* Map Card */}
-            <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl p-4 border border-[#1E3A8A] shadow-xl overflow-hidden">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-divider shadow-xl overflow-hidden">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-[#22D3EE] text-lg">📍</span>
-                <h3 className="text-white font-semibold">Our Location</h3>
+                <span className="text-brand-orange text-lg">ðŸ“</span>
+                <h3 className="text-text-primary font-semibold">Our Location</h3>
               </div>
               <div className="rounded-xl overflow-hidden">
                 <iframe
@@ -365,29 +305,29 @@ function ContactPage() {
                   className="w-full"
                 />
               </div>
-              <p className="text-gray-400 text-xs text-center mt-3">
+              <p className="text-text-muted text-xs text-center mt-3">
                 Visit our store for in-person shopping and support
               </p>
             </div>
 
             {/* Business Hours */}
-            <div className="bg-[#111827]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#1E3A8A] shadow-xl">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-divider shadow-xl">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-[#22D3EE] text-lg">⏰</span>
-                <h3 className="text-white font-semibold">Business Hours</h3>
+                <span className="text-brand-orange text-lg">â°</span>
+                <h3 className="text-text-primary font-semibold">Business Hours</h3>
               </div>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center py-2 border-b border-[#1E3A8A]">
-                  <span className="text-gray-400">Monday - Friday</span>
+                <div className="flex justify-between items-center py-2 border-b border-divider">
+                  <span className="text-text-muted">Monday - Friday</span>
                   <span className="text-white">10:00 AM - 7:00 PM</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-[#1E3A8A]">
-                  <span className="text-gray-400">Saturday</span>
+                <div className="flex justify-between items-center py-2 border-b border-divider">
+                  <span className="text-text-muted">Saturday</span>
                   <span className="text-white">11:00 AM - 5:00 PM</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-400">Sunday</span>
-                  <span className="text-[#FF6200] font-medium">Closed</span>
+                  <span className="text-text-muted">Sunday</span>
+                  <span className="text-brand-orange font-medium">Closed</span>
                 </div>
               </div>
             </div>

@@ -102,7 +102,7 @@ const CreateProductPage = () => {
 
   const formatPriceDisplay = (value) => {
     if (!value) return '';
-    return `रू ${parseFloat(value).toLocaleString('en-IN')}`;
+    return `à¤°à¥‚ ${parseFloat(value).toLocaleString('en-IN')}`;
   };
 
   const handleSubmit = async (e) => {
@@ -158,8 +158,8 @@ const CreateProductPage = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-teal-500 animate-pulse opacity-50"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-orange"></div>
+          <div className="absolute inset-0 rounded-full h-12 w-12 border-t-2 border-brand-orange animate-pulse opacity-50"></div>
         </div>
       </div>
     );
@@ -168,18 +168,18 @@ const CreateProductPage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-text-primary">
           {isEditMode ? 'Edit Product' : 'Create New Product'}
         </h1>
-        <p className="text-slate-400 mt-1">
+        <p className="text-text-muted mt-1">
           {isEditMode ? 'Update your product information' : 'Add a new product to your store'}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-slate-800 rounded-xl shadow-lg p-6 space-y-6 border border-slate-700">
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-6 border border-divider">
         {/* Product Name */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-text-secondary mb-2">
             Product Name *
           </label>
           <input
@@ -187,7 +187,7 @@ const CreateProductPage = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
             placeholder="Enter product name"
             required
           />
@@ -195,7 +195,7 @@ const CreateProductPage = () => {
 
         {/* Product Description */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-text-secondary mb-2">
             Description *
           </label>
           <textarea
@@ -203,7 +203,7 @@ const CreateProductPage = () => {
             value={formData.description}
             onChange={handleChange}
             rows="4"
-            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent resize-none"
             placeholder="Enter product description"
             required
           />
@@ -212,11 +212,11 @@ const CreateProductPage = () => {
         {/* Price and Stock */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Price * (Nepali Rupees - रू)
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Price * (Nepali Rupees - à¤°à¥‚)
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-3 text-slate-500 font-semibold">रू</span>
+              <span className="absolute left-3 top-3 text-text-muted font-semibold">à¤°à¥‚</span>
               <input
                 type="number"
                 name="price"
@@ -224,20 +224,20 @@ const CreateProductPage = () => {
                 onChange={handleChange}
                 step="1"
                 min="0"
-                className="w-full pl-8 pr-3 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-8 pr-3 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
                 placeholder="0"
                 required
               />
             </div>
             {formData.price && (
-              <p className="text-xs text-teal-400 mt-1">
+              <p className="text-xs text-brand-orange mt-1">
                 {formatPriceDisplay(formData.price)}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Stock Quantity
             </label>
             <input
@@ -246,7 +246,7 @@ const CreateProductPage = () => {
               value={formData.stock}
               onChange={handleChange}
               min="0"
-              className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
               placeholder="0"
             />
           </div>
@@ -254,14 +254,14 @@ const CreateProductPage = () => {
 
         {/* Category Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-text-secondary mb-2">
             Category *
           </label>
           <select
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+            className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary focus:ring-2 focus:ring-brand-orange focus:border-transparent cursor-pointer"
             required
           >
             <option value="">Select a category</option>
@@ -270,7 +270,7 @@ const CreateProductPage = () => {
             ) : (
               categories.map((category) => (
                 <option key={category._id} value={category.name}>
-                  {category.icon || '📦'} {category.name}
+                  {category.icon || 'ðŸ“¦'} {category.name}
                 </option>
               ))
             )}
@@ -284,7 +284,7 @@ const CreateProductPage = () => {
 
         {/* Product Images */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-text-secondary mb-2">
             Product Images (URLs)
           </label>
           {formData.images.map((image, index) => (
@@ -293,7 +293,7 @@ const CreateProductPage = () => {
                 type="url"
                 value={image}
                 onChange={(e) => handleImageChange(index, e.target.value)}
-                className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
                 placeholder={`Image URL ${index + 1}`}
               />
               {formData.images.length > 1 && (
@@ -310,28 +310,28 @@ const CreateProductPage = () => {
           <button
             type="button"
             onClick={addImageField}
-            className="mt-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            className="mt-2 text-sm text-brand-orange hover:text-brand-orange-dark transition-colors"
           >
             + Add Another Image
           </button>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-text-muted mt-1">
             Enter image URLs (e.g., https://example.com/image.jpg)
           </p>
         </div>
 
         {/* Form Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-slate-700">
+        <div className="flex gap-3 pt-4 border-t border-divider">
           <button
             type="submit"
             disabled={loading || categories.length === 0}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white py-3 rounded-lg font-semibold hover:from-brand-orange-dark hover:to-brand-orange transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Product' : 'Create Product')}
           </button>
           <button
             type="button"
             onClick={() => navigate('/admin/products')}
-            className="flex-1 bg-slate-700 text-slate-300 py-3 rounded-lg font-medium hover:bg-slate-600 transition-all duration-300"
+            className="flex-1 bg-brand-light text-text-secondary py-3 rounded-lg font-medium hover:bg-brand-light transition-all duration-300"
           >
             Cancel
           </button>

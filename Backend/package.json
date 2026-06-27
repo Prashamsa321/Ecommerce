@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed:products": "node scripts/seedProducts.js",
+    "seed:admin": "node scripts/seedAdmin.js",
+    "test:email": "node test-email.js"
   },
   "keywords": [],
   "author": "",

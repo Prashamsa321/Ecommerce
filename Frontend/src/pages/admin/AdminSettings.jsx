@@ -66,16 +66,16 @@ const AdminSettings = () => {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Security Settings</h1>
-        <p className="text-slate-400 mt-1">Change your admin account password</p>
+        <h1 className="text-2xl font-bold text-text-primary">Security Settings</h1>
+        <p className="text-text-muted mt-1">Change your admin account password</p>
       </div>
 
       {/* Change Password Card */}
-      <div className="bg-slate-800 rounded-xl shadow-lg border border-slate-700 overflow-hidden">
-        <div className="bg-gradient-to-r from-teal-600 to-blue-600 px-6 py-4">
+      <div className="bg-white rounded-xl shadow-lg border border-divider overflow-hidden">
+        <div className="bg-gradient-to-r from-brand-orange to-brand-orange-dark px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🔒</span>
-            <h2 className="text-lg font-semibold text-white">Change Password</h2>
+            <span className="text-2xl">ðŸ”’</span>
+            <h2 className="text-lg font-semibold text-text-primary">Change Password</h2>
           </div>
           <p className="text-white/80 text-sm mt-1">Update your password to keep your account secure</p>
         </div>
@@ -83,7 +83,7 @@ const AdminSettings = () => {
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Current Password */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Current Password
             </label>
             <input
@@ -91,7 +91,7 @@ const AdminSettings = () => {
               name="currentPassword"
               value={passwordData.currentPassword}
               onChange={handlePasswordChange}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-2 bg-brand-light border border-divider rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange"
               placeholder="Enter current password"
               required
             />
@@ -99,7 +99,7 @@ const AdminSettings = () => {
 
           {/* New Password */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               New Password
             </label>
             <input
@@ -107,7 +107,7 @@ const AdminSettings = () => {
               name="newPassword"
               value={passwordData.newPassword}
               onChange={handlePasswordChange}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-2 bg-brand-light border border-divider rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange"
               placeholder="Minimum 6 characters"
               required
             />
@@ -115,7 +115,7 @@ const AdminSettings = () => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Confirm New Password
             </label>
             <input
@@ -123,7 +123,7 @@ const AdminSettings = () => {
               name="confirmPassword"
               value={passwordData.confirmPassword}
               onChange={handlePasswordChange}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-2 bg-brand-light border border-divider rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange"
               placeholder="Confirm new password"
               required
             />
@@ -133,7 +133,7 @@ const AdminSettings = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg font-semibold hover:from-teal-600 hover:to-blue-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white rounded-lg font-semibold hover:from-brand-orange-dark hover:to-brand-orange transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -151,11 +151,11 @@ const AdminSettings = () => {
       </div>
 
       {/* Password Tips */}
-      <div className="mt-6 bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-          <span>💡</span> Password Tips
+      <div className="mt-6 bg-white/50 rounded-lg p-4 border border-divider">
+        <h3 className="text-sm font-semibold text-text-primary mb-2 flex items-center gap-2">
+          <span>ðŸ’¡</span> Password Tips
         </h3>
-        <ul className="text-xs text-slate-400 space-y-1 ml-6 list-disc">
+        <ul className="text-xs text-text-muted space-y-1 ml-6 list-disc">
           <li>Use at least 6 characters</li>
           <li>Combine letters, numbers, and special characters</li>
           <li>Avoid using common words or personal information</li>

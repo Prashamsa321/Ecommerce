@@ -1,5 +1,19 @@
 import OTP from '../models/OTP.js';
+import User from '../models/User.js';
+import bcrypt from 'bcrypt';
 import { sendOTPEmail } from '../services/emailService.js';
+
+const isDev = process.env.NODE_ENV !== 'production';
+
+const buildOtpResponse = (message, email, otp, emailResult) => ({
+  success: true,
+  message,
+  email,
+  emailSent: Boolean(emailResult?.sent),
+  ...(isDev ? { devOTP: otp } : {}),
+  ...(emailResult?.previewUrl ? { emailPreviewUrl: emailResult.previewUrl } : {}),
+  ...(emailResult?.usedDevFallback ? { usedDevFallback: true } : {}),
+});
 
 // Generate random OTP
 const generateOTP = () => {
@@ -22,7 +36,6 @@ export const sendRegistrationOTP = async (req, res) => {
     }
 
     // Check if user already exists
-    const User = (await import('../models/User.js')).default;
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
@@ -35,8 +48,6 @@ export const sendRegistrationOTP = async (req, res) => {
     const otp = generateOTP();
     console.log(`Generated OTP for ${email}: ${otp}`);
     
-    // Hash password before storing in OTP
-    const bcrypt = await import('bcrypt');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -55,20 +66,22 @@ export const sendRegistrationOTP = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000)
     });
 
-    // Try to send email (optional - for development we can skip)
-    let emailSent = false;
-    try {
-      emailSent = await sendOTPEmail(email, otp, name);
-    } catch (err) {
-      console.log('Email sending skipped or failed:', err.message);
-    }
+    const emailResult = await sendOTPEmail(email, otp, name);
 
-    res.status(200).json({
-      success: true,
-      message: 'OTP sent successfully',
-      email: email,
-      
-    });
+    res.status(200).json(
+      buildOtpResponse(
+        emailResult.sent
+          ? 'OTP sent successfully to your email'
+          : emailResult.previewUrl
+            ? 'Email preview ready — open the link below to view your OTP'
+            : isDev
+              ? 'OTP generated — use the code shown on screen'
+              : 'Could not send email. Check server email settings and try again.',
+        email,
+        otp,
+        emailResult
+      )
+    );
   } catch (error) {
     console.error('Send OTP error:', error);
     res.status(500).json({
@@ -159,17 +172,22 @@ export const resendOTP = async (req, res) => {
     otpRecord.expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await otpRecord.save();
 
-    // Try to send email
-    try {
-      await sendOTPEmail(email, newOTP, otpRecord.userData.name);
-    } catch (err) {
-      console.log('Email sending skipped:', err.message);
-    }
+    const emailResult = await sendOTPEmail(email, newOTP, otpRecord.userData.name);
 
-    res.status(200).json({
-      success: true,
-      message: 'OTP resent successfully',
-    });
+    res.status(200).json(
+      buildOtpResponse(
+        emailResult.sent
+          ? 'OTP resent successfully to your email'
+          : emailResult.previewUrl
+            ? 'Email preview ready — open the link below to view your OTP'
+            : isDev
+              ? 'New OTP generated — use the code shown on screen'
+              : 'Could not send email. Check server email settings and try again.',
+        email,
+        newOTP,
+        emailResult
+      )
+    );
   } catch (error) {
     console.error('Resend OTP error:', error);
     res.status(500).json({

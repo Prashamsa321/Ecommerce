@@ -22,6 +22,8 @@ const RegisterPage = () => {
   // Step 2: OTP Form
   const [otp, setOtp] = useState('');
   const [otpEmail, setOtpEmail] = useState('');
+  const [devOtp, setDevOtp] = useState('');
+  const [emailPreviewUrl, setEmailPreviewUrl] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
@@ -67,17 +69,24 @@ const RegisterPage = () => {
       });
       
       if (result.success) {
-        success('OTP sent to your email!');
+        if (result.emailSent) {
+          success('OTP sent to your email!');
+        } else if (result.emailPreviewUrl) {
+          success('Email preview is ready');
+          info('Open the preview link below to view your verification email.');
+        } else if (result.devOTP) {
+          success('Verification code generated');
+          info(`Your code: ${result.devOTP}`);
+          console.log('Development OTP:', result.devOTP);
+        } else {
+          info(result.message || 'OTP generated. Please check your email.');
+        }
         setOtpEmail(formData.email);
+        if (result.devOTP) setDevOtp(result.devOTP);
+        setEmailPreviewUrl(result.emailPreviewUrl || '');
         setStep(2);
         setCountdown(60);
         startCountdown();
-        
-        // For development - show OTP in console
-        if (result.devOTP) {
-          info(`Development OTP: ${result.devOTP}`);
-          console.log('Development OTP:', result.devOTP);
-        }
       } else {
         toastError(result.message || 'Failed to send OTP');
       }
@@ -144,12 +153,18 @@ const RegisterPage = () => {
     try {
       const result = await otpService.resendOTP(otpEmail);
       if (result.success) {
-        success('OTP resent successfully!');
+        if (result.emailSent) {
+          success('OTP resent successfully!');
+        } else if (result.devOTP) {
+          success('New OTP generated');
+          info(`Your verification code: ${result.devOTP}`);
+        } else {
+          info(result.message || 'OTP resent');
+        }
         setCountdown(60);
         startCountdown();
-        if (result.devOTP) {
-          info(`Development OTP: ${result.devOTP}`);
-        }
+        if (result.devOTP) setDevOtp(result.devOTP);
+        setEmailPreviewUrl(result.emailPreviewUrl || '');
       } else {
         toastError(result.message || 'Failed to resend OTP');
       }
@@ -161,27 +176,27 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2540] to-[#1E3A8A] px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-auth px-4 pb-20 md:pb-0">
+      <div className="max-w-md w-full card-premium p-8">
         {step === 1 ? (
           // Step 1: Registration Form
           <>
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E3A8A]/30 border border-[#22D3EE]/30 rounded-full text-[#22D3EE] text-sm mb-4 backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-light border border-brand-orange/20 rounded-full text-brand-orange text-sm mb-4">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22D3EE] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22D3EE]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange"></span>
                 </span>
                 Join Us Today
               </div>
-              <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
-              <p className="text-gray-300">Join MeroGadget today</p>
+              <h2 className="text-3xl font-bold text-text-primary mb-2">Create Account</h2>
+              <p className="text-text-secondary">Join MeroGadget today</p>
             </div>
             
             <form className="mt-8 space-y-6" onSubmit={handleSendOTP}>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-2">
                     Full Name
                   </label>
                   <input
@@ -192,12 +207,12 @@ const RegisterPage = () => {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
                     placeholder="John Doe"
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-2">
                     Email Address
                   </label>
                   <input
@@ -208,12 +223,12 @@ const RegisterPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
                     placeholder="name@example.com"
                   />
                 </div>
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-2">
                     Password
                   </label>
                   <input
@@ -224,12 +239,12 @@ const RegisterPage = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
                     placeholder="Minimum 6 characters"
                   />
                 </div>
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-secondary mb-2">
                     Confirm Password
                   </label>
                   <input
@@ -240,7 +255,7 @@ const RegisterPage = () => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-white border border-divider rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
                     placeholder="Repeat your password"
                   />
                 </div>
@@ -249,7 +264,7 @@ const RegisterPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#FF6200] to-[#FF3D00] text-white py-3.5 rounded-xl font-semibold hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                className="w-full bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white py-3.5 rounded-xl font-semibold hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -263,7 +278,7 @@ const RegisterPage = () => {
               </button>
               
               <div className="text-center">
-                <Link to="/login" className="text-[#22D3EE] hover:text-[#FF6200] transition-colors text-sm">
+                <Link to="/login" className="text-brand-orange hover:text-brand-orange transition-colors text-sm">
                   Already have an account? <span className="font-semibold">Sign in</span>
                 </Link>
               </div>
@@ -273,21 +288,40 @@ const RegisterPage = () => {
           // Step 2: OTP Verification Form
           <>
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-[#FF6200]/20 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-[#FF6200]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 mx-auto mb-4 bg-brand-orange/20 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-white mb-2">Verify Email</h2>
-              <p className="text-gray-300">
+              <h2 className="text-3xl font-bold text-text-primary mb-2">Verify Email</h2>
+              <p className="text-text-secondary">
                 Enter the 6-digit code sent to<br />
-                <span className="text-[#22D3EE] font-medium">{otpEmail}</span>
+                <span className="text-brand-orange font-medium">{otpEmail}</span>
               </p>
+              {devOtp && (
+                <div className="mt-4 p-3 rounded-xl bg-brand-light border border-brand-orange/20">
+                  <p className="text-xs text-text-muted mb-1">Your verification code</p>
+                  <p className="text-2xl font-bold tracking-[0.4em] text-brand-orange">{devOtp}</p>
+                </div>
+              )}
+              {emailPreviewUrl && (
+                <div className="mt-4 p-3 rounded-xl bg-brand-light border border-brand-orange/20 text-left">
+                  <p className="text-xs text-text-muted mb-2">Email could not reach your inbox (SMTP not configured). Open this preview instead:</p>
+                  <a
+                    href={emailPreviewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-semibold text-brand-orange hover:text-brand-orange-dark break-all"
+                  >
+                    View verification email
+                  </a>
+                </div>
+              )}
             </div>
             
             <form className="mt-8 space-y-6" onSubmit={handleVerifyOTP}>
               <div>
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-300 mb-2 text-center">
+                <label htmlFor="otp" className="block text-sm font-medium text-text-secondary mb-2 text-center">
                   Verification Code
                 </label>
                 <div className="relative">
@@ -299,7 +333,7 @@ const RegisterPage = () => {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                     maxLength="6"
-                    className="w-full px-4 py-4 bg-[#111827] border border-[#1E3A8A] rounded-xl text-white text-center text-3xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-[#FF6200] focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-4 input-field text-center text-3xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all duration-300"
                     placeholder="000000"
                     autoFocus
                   />
@@ -309,7 +343,7 @@ const RegisterPage = () => {
                     </svg>
                   </div>
                 </div>
-                <p className="text-center text-xs text-gray-400 mt-2">
+                <p className="text-center text-xs text-text-muted mt-2">
                   Enter the 6-digit verification code
                 </p>
               </div>
@@ -317,7 +351,7 @@ const RegisterPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#FF6200] to-[#FF3D00] text-white py-3.5 rounded-xl font-semibold hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                className="w-full bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white py-3.5 rounded-xl font-semibold hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -335,7 +369,7 @@ const RegisterPage = () => {
                   type="button"
                   onClick={handleResendOTP}
                   disabled={countdown > 0 || resendLoading}
-                  className="text-[#22D3EE] hover:text-[#FF6200] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-brand-orange hover:text-brand-orange transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {countdown > 0 
                     ? `Resend code in ${countdown}s` 
