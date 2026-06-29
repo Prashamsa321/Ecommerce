@@ -1,6 +1,6 @@
-import Product from '../models/Product.js';
+import Product from '../models/product.js';
 import Order from '../models/Order.js';
-import User from '../models/User.js';
+import User from '../models/user.js';
 import Contact from '../models/Contact.js';
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -63,7 +63,7 @@ export const getAdminReports = async (req, res) => {
       status,
     }));
 
-    const paymentMethodCounts = ['COD', 'esewa'].map((method) => ({
+    const paymentMethodCounts = ['COD', 'esewa', 'khalti'].map((method) => ({
       name: method,
       value: orders.filter((o) => (o.paymentMethod || 'COD').toLowerCase() === method.toLowerCase()).length,
     }));

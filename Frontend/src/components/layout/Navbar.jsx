@@ -1,25 +1,21 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Search, ShoppingCart, User, Menu, X,
-  ChevronDown, Smartphone, Laptop, Headphones, Watch, Gamepad2,
-  Camera, Tablet, Speaker, Cpu, Home as HomeIcon, Grid3X3
-} from 'lucide-react'
+import FaIcon from '../common/FaIcon'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
 import { productService } from '../../services/productService'
 
 const CATEGORIES = [
-  { name: 'Smartphones', icon: Smartphone, slug: 'Smartphones' },
-  { name: 'Laptops', icon: Laptop, slug: 'Laptops' },
-  { name: 'Tablets', icon: Tablet, slug: 'Tablets' },
-  { name: 'Headphones', icon: Headphones, slug: 'Headphones' },
-  { name: 'Smart Watches', icon: Watch, slug: 'Smart Watches' },
-  { name: 'Gaming', icon: Gamepad2, slug: 'Gaming' },
-  { name: 'Cameras', icon: Camera, slug: 'Cameras' },
-  { name: 'Audio', icon: Speaker, slug: 'Audio' },
-  { name: 'Accessories', icon: Cpu, slug: 'Accessories' },
+  { name: 'Smartphones', icon: 'mobile-screen', slug: 'Smartphones' },
+  { name: 'Laptops', icon: 'laptop', slug: 'Laptops' },
+  { name: 'Tablets', icon: 'tablet-screen-button', slug: 'Tablets' },
+  { name: 'Headphones', icon: 'headphones', slug: 'Headphones' },
+  { name: 'Smart Watches', icon: 'clock', slug: 'Smart Watches' },
+  { name: 'Gaming', icon: 'gamepad', slug: 'Gaming' },
+  { name: 'Cameras', icon: 'camera', slug: 'Cameras' },
+  { name: 'Audio', icon: 'volume-high', slug: 'Audio' },
+  { name: 'Accessories', icon: 'microchip', slug: 'Accessories' },
 ]
 
 const navLinkClass = (active) =>
@@ -203,7 +199,7 @@ const Navbar = () => {
                 onMouseLeave={() => setMegaOpen(false)}
               >
                 <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-text-secondary hover:text-brand-orange rounded-xl hover:bg-brand-light transition-all">
-                  Categories <ChevronDown size={14} className={`transition-transform ${megaOpen ? 'rotate-180' : ''}`} />
+                  Categories <FaIcon icon="chevron-down" size={14} className={`transition-transform ${megaOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
                   {megaOpen && (
@@ -215,14 +211,14 @@ const Navbar = () => {
                       className="absolute top-full left-0 mt-2 w-[520px] glass rounded-2xl p-6 shadow-card border border-divider"
                     >
                       <div className="grid grid-cols-3 gap-2">
-                        {CATEGORIES.map(({ name, icon: Icon, slug }) => (
+                        {CATEGORIES.map(({ name, icon, slug }) => (
                           <Link
                             key={slug}
                             to={`/products?category=${encodeURIComponent(slug)}`}
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-brand-light group transition-all"
                           >
                             <div className="w-9 h-9 rounded-lg bg-brand-light flex items-center justify-center group-hover:bg-brand-orange/10 transition-colors">
-                              <Icon size={16} className="text-brand-orange" />
+                              <FaIcon icon={icon} size={16} className="text-brand-orange" />
                             </div>
                             <span className="text-sm text-text-secondary group-hover:text-brand-orange">{name}</span>
                           </Link>
@@ -244,7 +240,7 @@ const Navbar = () => {
 
             <div className="hidden md:flex flex-1 max-w-md mx-4" ref={searchRef}>
               <form onSubmit={handleSearch} className="relative w-full">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                <FaIcon icon="magnifying-glass" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 <input
                   type="search"
                   placeholder="Search electronics..."
@@ -259,7 +255,7 @@ const Navbar = () => {
                   aria-label="Search products"
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all"
                 >
-                  <Search size={16} />
+                  <FaIcon icon="magnifying-glass" size={16} />
                 </button>
                 {renderSuggestions(() => goToSearchResults())}
               </form>
@@ -277,10 +273,10 @@ const Navbar = () => {
                 className="md:hidden p-2.5 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all"
                 aria-label="Search"
               >
-                <Search size={20} />
+                <FaIcon icon="magnifying-glass" size={20} />
               </button>
               <Link to="/cart" className="p-2.5 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all relative">
-                <ShoppingCart size={20} />
+                <FaIcon icon="cart-shopping" size={20} />
                 {getCartCount() > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-brand-orange text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {getCartCount() > 9 ? '9+' : getCartCount()}
@@ -294,7 +290,7 @@ const Navbar = () => {
                   className="flex items-center gap-2 p-1.5 pr-3 rounded-2xl hover:bg-brand-light transition-all border border-transparent hover:border-divider"
                 >
                   <div className="w-8 h-8 rounded-xl bg-gradient-cta flex items-center justify-center">
-                    <User size={16} className="text-white" />
+                    <FaIcon icon="user" size={16} className="text-white" />
                   </div>
                   {user && <span className="hidden lg:block text-sm font-medium text-text-secondary max-w-[80px] truncate">{user.name?.split(' ')[0]}</span>}
                 </button>
@@ -336,7 +332,7 @@ const Navbar = () => {
                 className="lg:hidden p-2.5 rounded-xl text-text-secondary hover:text-brand-orange hover:bg-brand-light"
                 aria-label="Menu"
               >
-                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+                {mobileOpen ? <FaIcon icon="xmark" size={22} /> : <FaIcon icon="bars" size={22} />}
               </button>
             </div>
           </div>
@@ -354,7 +350,7 @@ const Navbar = () => {
               <form onSubmit={handleSearch} className="section-container py-3">
                 <div className="relative flex gap-2">
                   <div className="relative flex-1">
-                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                    <FaIcon icon="magnifying-glass" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                     <input
                       type="search"
                       placeholder="Search electronics..."

@@ -14,6 +14,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import AboutPage from './pages/AboutPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutPage from './pages/CheckoutPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import Footer from './components/layout/Footer';
 import MobileBottomNav from './components/layout/MobileBottomNav';
 
@@ -26,7 +27,6 @@ import AdminUsers from './pages/admin/AdminUsers';
 import CategoriesPage from './pages/admin/CategoriesPage';
 import CreateProductPage from './pages/admin/CreateProductPage';
 import AdminProfile from './pages/admin/AdminProfile';
-import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminRoleManagement from './pages/admin/AdminRoleManagement';
 import AdminReports from './pages/admin/AdminReports';
@@ -61,8 +61,9 @@ function App() {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/paymentsuccess" element={<PaymentSuccessPage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/login" element={<Navigate to="/login" replace />} />
         <Route path="/register" element={<Register />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

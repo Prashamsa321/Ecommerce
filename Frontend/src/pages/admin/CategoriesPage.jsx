@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
+import FaIcon from '../../components/common/FaIcon';
 import { categoryService } from '../../services/categoryService';
 import { productService } from '../../services/productService';
+import { CATEGORY_ICON_OPTIONS, getCategoryIcon } from '../../utils/categoryIcons';
 
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
@@ -10,18 +12,13 @@ const CategoriesPage = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editName, setEditName] = useState('');
-  const [editIcon, setEditIcon] = useState('');
+  const [editIcon, setEditIcon] = useState('box');
   const { success, error } = useToast();
   
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  const iconOptions = [
-    { icon: 'ðŸ“º' }, { icon: 'ðŸ§Š' }, { icon: 'â„ï¸' }, { icon: 'âŒš' },
-    { icon: 'ðŸ“±' }, { icon: 'ðŸ’»' }, { icon: 'ðŸŽ§' }, { icon: 'ðŸŽ®' },
-    { icon: 'ðŸ“·' }, { icon: 'ðŸ”Š' }, { icon: 'ðŸ–¥ï¸' }, { icon: 'âŒ¨ï¸' },
-    { icon: 'ðŸ–¨ï¸' }, { icon: 'ðŸ“¡' }, { icon: 'ðŸ”‹' }, { icon: 'ðŸ’¾' }
-  ];
+  const iconOptions = CATEGORY_ICON_OPTIONS;
 
   useEffect(() => {
     fetchCategoriesWithCounts();
@@ -31,14 +28,10 @@ const CategoriesPage = () => {
     try {
       setLoading(true);
       
-      // Fetch all categories
       const categoriesData = await categoryService.getAllCategories();
-      
-      // Fetch all products to count per category
       const productsData = await productService.getAllProducts();
       const allProducts = Array.isArray(productsData) ? productsData : [];
       
-      // Count products per category
       const categoriesWithCounts = categoriesData.map(category => {
         const productCount = allProducts.filter(
           product => product.category === category.name
@@ -68,7 +61,7 @@ const CategoriesPage = () => {
     try {
       await categoryService.createCategory({
         name: newCategoryName,
-        icon: 'ðŸ“¦'
+        icon: getCategoryIcon({ name: newCategoryName })
       });
       
       success('Category added successfully');
@@ -82,7 +75,7 @@ const CategoriesPage = () => {
   const handleEditCategory = (category) => {
     setEditingCategory(category);
     setEditName(category.name);
-    setEditIcon(category.icon || 'ðŸ“¦');
+    setEditIcon(getCategoryIcon(category));
   };
 
   const handleUpdateCategory = async () => {
@@ -108,7 +101,7 @@ const CategoriesPage = () => {
   const handleCancelEdit = () => {
     setEditingCategory(null);
     setEditName('');
-    setEditIcon('ðŸ“¦');
+    setEditIcon('box');
   };
 
   const openDeleteModal = (category) => {
@@ -143,7 +136,6 @@ const CategoriesPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Categories</h1>
@@ -154,7 +146,6 @@ const CategoriesPage = () => {
         </div>
       </div>
 
-      {/* Add Category */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-divider">
         <h2 className="text-lg font-semibold text-text-primary mb-4">Add New Category</h2>
         <div className="flex flex-col md:flex-row gap-3">
@@ -169,15 +160,15 @@ const CategoriesPage = () => {
             onClick={handleAddCategory}
             className="bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white px-6 py-2.5 rounded-lg hover:from-brand-orange-dark hover:to-brand-orange transition-all duration-300 flex items-center gap-2 font-medium"
           >
-            <span className="text-lg">+</span> Add Category
+            <FaIcon icon="plus" size={16} />
+            Add Category
           </button>
         </div>
       </div>
 
-      {/* Categories Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-divider">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-700">
+          <table className="min-w-full divide-y divide-divider">
             <thead className="bg-surface-primary">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Icon</th>
@@ -186,11 +177,11 @@ const CategoriesPage = () => {
                 <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-700">
+            <tbody className="bg-white divide-y divide-divider">
               {categories.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-12 text-center text-text-muted">
-                    <div className="text-5xl mb-2">ðŸ·ï¸</div>
+                    <FaIcon icon="tags" className="text-text-muted mx-auto mb-2" size={40} />
                     <p>No categories found</p>
                     <p className="text-sm mt-1">Click "Add Category" to create your first category</p>
                   </td>
@@ -199,20 +190,25 @@ const CategoriesPage = () => {
                 categories.map((category) => (
                   <tr key={category._id} className="hover:bg-brand-light/50 transition-colors">
                     {editingCategory?._id === category._id ? (
-                      // Edit Mode
                       <>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <select
-                            value={editIcon}
-                            onChange={(e) => setEditIcon(e.target.value)}
-                            className="px-2 py-1 bg-surface-primary border border-divider rounded-lg text-text-primary focus:ring-2 focus:ring-brand-orange"
-                          >
-                            {iconOptions.map(option => (
-                              <option key={option.icon} value={option.icon}>
-                                {option.icon}
-                              </option>
+                          <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+                            {iconOptions.map((option) => (
+                              <button
+                                key={option.icon}
+                                type="button"
+                                onClick={() => setEditIcon(option.icon)}
+                                title={option.label}
+                                className={`h-9 w-9 rounded-lg border flex items-center justify-center transition-colors ${
+                                  editIcon === option.icon
+                                    ? 'border-brand-orange bg-brand-light text-brand-orange'
+                                    : 'border-divider text-text-muted hover:border-brand-orange/40 hover:text-brand-orange'
+                                }`}
+                              >
+                                <FaIcon icon={option.icon} size={16} />
+                              </button>
                             ))}
-                          </select>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <input
@@ -232,34 +228,31 @@ const CategoriesPage = () => {
                               className="text-green-400 hover:text-green-300 transition-colors p-1"
                               title="Save"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
+                              <FaIcon icon="check" size={20} />
                             </button>
                             <button
                               onClick={handleCancelEdit}
-                              className="text-text-muted hover:text-white transition-colors p-1"
+                              className="text-text-muted hover:text-text-primary transition-colors p-1"
                               title="Cancel"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
+                              <FaIcon icon="xmark" size={20} />
                             </button>
                           </div>
                         </td>
                       </>
                     ) : (
-                      // View Mode
                       <>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-2xl">{category.icon || 'ðŸ“¦'}</span>
+                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-brand-light text-brand-orange">
+                            <FaIcon icon={getCategoryIcon(category)} size={18} />
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="font-medium text-white">{category.name}</span>
+                          <span className="font-medium text-text-primary">{category.name}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-light0/20 text-brand-orange text-xs font-medium rounded-full border border-brand-orange/20">
-                            ðŸ“¦ {category.productCount || 0}
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-light text-brand-orange text-xs font-medium rounded-full border border-brand-orange/20">
+                            {category.productCount || 0} products
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -269,18 +262,14 @@ const CategoriesPage = () => {
                               className="text-brand-orange hover:text-brand-orange-dark transition-colors p-1"
                               title="Edit Category"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
+                              <FaIcon icon="pen-to-square" size={18} />
                             </button>
                             <button
                               onClick={() => openDeleteModal(category)}
                               className="text-red-400 hover:text-red-300 transition-colors p-1"
                               title="Delete Category"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                              <FaIcon icon="trash" size={18} />
                             </button>
                           </div>
                         </td>
@@ -294,7 +283,6 @@ const CategoriesPage = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

@@ -8,16 +8,16 @@ dotenv.config()
 const TARGET_COUNT = 100
 
 const ELECTRONIC_CATEGORIES = [
-  { name: 'Smartphones', icon: '📱' },
-  { name: 'Laptops', icon: '💻' },
-  { name: 'Tablets', icon: '📲' },
-  { name: 'Headphones', icon: '🎧' },
-  { name: 'Smart Watches', icon: '⌚' },
-  { name: 'Cameras', icon: '📷' },
-  { name: 'Gaming', icon: '🎮' },
-  { name: 'Monitors', icon: '🖥️' },
-  { name: 'Accessories', icon: '🔌' },
-  { name: 'Audio', icon: '🔊' },
+  { name: 'Smartphones', icon: 'mobile-screen' },
+  { name: 'Laptops', icon: 'laptop' },
+  { name: 'Tablets', icon: 'tablet-screen-button' },
+  { name: 'Headphones', icon: 'headphones' },
+  { name: 'Smart Watches', icon: 'clock' },
+  { name: 'Cameras', icon: 'camera' },
+  { name: 'Gaming', icon: 'gamepad' },
+  { name: 'Monitors', icon: 'desktop' },
+  { name: 'Accessories', icon: 'plug' },
+  { name: 'Audio', icon: 'volume-high' },
 ]
 
 const ALLOWED_CATEGORY_NAMES = new Set(ELECTRONIC_CATEGORIES.map((c) => c.name))

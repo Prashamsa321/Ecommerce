@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, LogOut } from 'lucide-react'
+import FaIcon from '../../common/FaIcon'
 
 const ease = [0.4, 0, 0.2, 1]
 
-const NavIcon = ({ icon: Icon, className = 'w-[18px] h-[18px]' }) => (
-  <Icon className={`${className} shrink-0`} strokeWidth={2} aria-hidden="true" />
+const NavIcon = ({ icon, className = '' }) => (
+  <FaIcon icon={icon} className={`shrink-0 ${className}`} size={18} />
 )
 
 const dropdownVariants = {
@@ -92,7 +92,7 @@ const AdminSidebar = ({
                         </span>
                         {labels && (
                           <motion.span animate={{ rotate: isDropdownOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
-                            <ChevronDown className="h-4 w-4 text-slate-400" />
+                            <FaIcon icon="chevron-down" className="text-slate-400" size={16} />
                           </motion.span>
                         )}
                       </button>
@@ -167,7 +167,7 @@ const AdminSidebar = ({
           title={!labels ? 'Logout' : undefined}
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
-            <LogOut className="h-[18px] w-[18px]" />
+            <FaIcon icon="right-from-bracket" size={18} />
           </span>
           {labels && <span>Logout</span>}
         </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import FaIcon from '../components/common/FaIcon';
 
 const AboutPage = () => {
     const [counters, setCounters] = useState({
@@ -79,21 +80,21 @@ const AboutPage = () => {
     ];
 
     const features = [
-        { icon: "ðŸ”’", title: "100% Genuine Products", desc: "Official warranty on all electronics" },
-        { icon: "ðŸšš", title: "Free Express Shipping", desc: "On orders over NPR 5,000" },
-        { icon: "ðŸ’³", title: "Easy EMI Options", desc: "Flexible payment plans available" },
-        { icon: "ðŸ›¡ï¸", title: "7-Day Replacement", desc: "Hassle-free returns & refunds" },
-        { icon: "ðŸ“ž", title: "24/7 Customer Support", desc: "Always here to help you" },
-        { icon: "â­", title: "15K+ Happy Customers", desc: "Trusted by thousands" }
+        { icon: 'shield-halved', title: "100% Genuine Products", desc: "Official warranty on all electronics" },
+        { icon: 'truck-fast', title: "Free Express Shipping", desc: "On orders over NPR 5,000" },
+        { icon: 'credit-card', title: "Easy EMI Options", desc: "Flexible payment plans available" },
+        { icon: 'rotate-left', title: "7-Day Replacement", desc: "Hassle-free returns & refunds" },
+        { icon: 'headset', title: "24/7 Customer Support", desc: "Always here to help you" },
+        { icon: 'star', title: "15K+ Happy Customers", desc: "Trusted by thousands" }
     ];
 
     const offerings = [
-        { icon: "ðŸ“±", title: "Smartphones", desc: "Latest iPhone, Samsung, OnePlus" },
-        { icon: "ðŸ’»", title: "Laptops", desc: "Gaming, Business, Student laptops" },
-        { icon: "ðŸŽ§", title: "Audio Devices", desc: "Headphones, Speakers, Earbuds" },
-        { icon: "âŒš", title: "Smart Watches", desc: "Fitness & Lifestyle trackers" },
-        { icon: "ðŸŽ®", title: "Gaming Gear", desc: "Consoles, Controllers, Accessories" },
-        { icon: "ðŸ ", title: "Smart Home", desc: "IoT devices & home automation" }
+        { icon: 'mobile-screen', title: "Smartphones", desc: "Latest iPhone, Samsung, OnePlus" },
+        { icon: 'laptop', title: "Laptops", desc: "Gaming, Business, Student laptops" },
+        { icon: 'headphones', title: "Audio Devices", desc: "Headphones, Speakers, Earbuds" },
+        { icon: 'clock', title: "Smart Watches", desc: "Fitness & Lifestyle trackers" },
+        { icon: 'gamepad', title: "Gaming Gear", desc: "Consoles, Controllers, Accessories" },
+        { icon: 'house', title: "Smart Home", desc: "IoT devices & home automation" }
     ];
 
     const teamMembers = [
@@ -177,7 +178,9 @@ const AboutPage = () => {
 
                     <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
                         <div className="bg-gradient-auth rounded-2xl p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                            <div className="text-4xl mb-4">ðŸŽ¯</div>
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+                                <FaIcon icon="bullseye" size={24} />
+                            </div>
                             <h3 className="text-xl md:text-2xl font-bold text-text-primary mb-3">Our Mission</h3>
                             <p className="text-text-secondary leading-relaxed">
                                 To empower Nepali consumers with authentic, high-quality technology products
@@ -186,7 +189,9 @@ const AboutPage = () => {
                         </div>
 
                         <div className="bg-gradient-auth rounded-2xl p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                            <div className="text-4xl mb-4">ðŸ‘ï¸</div>
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+                                <FaIcon icon="eye" size={24} />
+                            </div>
                             <h3 className="text-xl md:text-2xl font-bold text-text-primary mb-3">Our Vision</h3>
                             <p className="text-text-secondary leading-relaxed">
                                 To become Nepal's most trusted and preferred electronics destination,
@@ -218,7 +223,9 @@ const AboutPage = () => {
                                 key={index}
                                 className="bg-gradient-auth rounded-xl p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                             >
-                                <div className="text-3xl mb-3">{item.icon}</div>
+                                <div className="mb-3 text-brand-orange">
+                                    <FaIcon icon={item.icon} size={28} />
+                                </div>
                                 <h3 className="text-lg font-semibold text-text-primary mb-2">{item.title}</h3>
                                 <p className="text-text-muted text-sm">{item.desc}</p>
                             </div>
@@ -248,7 +255,9 @@ const AboutPage = () => {
                                 key={index}
                                 className="flex items-start gap-4 p-5 bg-white rounded-xl border border-divider hover:border-brand-orange transition-all duration-300"
                             >
-                                <div className="text-2xl">{feature.icon}</div>
+                                <div className="text-brand-orange">
+                                    <FaIcon icon={feature.icon} size={24} />
+                                </div>
                                 <div>
                                     <h3 className="text-text-primary font-semibold mb-1">{feature.title}</h3>
                                     <p className="text-text-muted text-sm">{feature.desc}</p>
@@ -276,7 +285,10 @@ const AboutPage = () => {
                             <div className="text-white/80 text-sm">Orders Completed</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl md:text-4xl font-bold text-text-primary mb-1">{counters.rating}â­</div>
+                            <div className="text-3xl md:text-4xl font-bold text-text-primary mb-1 flex items-center justify-center gap-1">
+                                {counters.rating}
+                                <FaIcon icon="star" size={24} className="text-white" />
+                            </div>
                             <div className="text-white/80 text-sm">Customer Rating</div>
                         </div>
                     </div>
@@ -345,7 +357,7 @@ const AboutPage = () => {
                                 </div>
                                 <div className="flex mb-2">
                                     {[...Array(5)].map((_, i) => (
-                                        <span key={i} className={`text-base ${i < testimonial.rating ? 'text-yellow-400' : 'text-gray-600'}`}>â˜…</span>
+                                        <FaIcon key={i} icon="star" size={14} className={i < testimonial.rating ? 'text-brand-amber' : 'text-divider'} />
                                     ))}
                                 </div>
                                 <p className="text-text-secondary text-sm leading-relaxed">"{testimonial.text}"</p>
@@ -369,7 +381,7 @@ const AboutPage = () => {
                         className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white rounded-full font-semibold hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105"
                     >
                         Shop Now
-                        <span>â†’</span>
+                        <FaIcon icon="arrow-right" size={16} />
                     </Link>
                 </div>
             </section>

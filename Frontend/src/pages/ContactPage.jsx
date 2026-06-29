@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import FaIcon from '../components/common/FaIcon';
 import { contactService } from '../services/contactService';
 import { useToast } from '../context/ToastContext';
 
@@ -139,7 +140,7 @@ function ContactPage() {
                   />
                   {errors.name && (
                     <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                      <span>âš ï¸</span> {errors.name}
+                      <FaIcon icon="triangle-exclamation" size={12} /> {errors.name}
                     </p>
                   )}
                 </div>
@@ -161,7 +162,7 @@ function ContactPage() {
                   />
                   {errors.email && (
                     <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                      <span>âš ï¸</span> {errors.email}
+                      <FaIcon icon="triangle-exclamation" size={12} /> {errors.email}
                     </p>
                   )}
                 </div>
@@ -184,7 +185,7 @@ function ContactPage() {
                 />
                 {errors.subject && (
                   <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                    <span>âš ï¸</span> {errors.subject}
+                    <FaIcon icon="triangle-exclamation" size={12} /> {errors.subject}
                   </p>
                 )}
               </div>
@@ -206,7 +207,7 @@ function ContactPage() {
                 />
                 {errors.message && (
                   <p className="mt-1 text-[#FF3B30] text-xs flex items-center gap-1">
-                    <span>âš ï¸</span> {errors.message}
+                    <FaIcon icon="triangle-exclamation" size={12} /> {errors.message}
                   </p>
                 )}
               </div>
@@ -215,21 +216,16 @@ function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-brand-orange to-brand-orange-dark hover:from-[#FF3D00] hover:to-[brand-orange] disabled:bg-brand-light disabled:cursor-not-allowed text-text-primary font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                className="w-full bg-gradient-to-r from-brand-orange to-brand-orange-dark hover:from-[#FF3D00] hover:to-brand-orange disabled:bg-brand-light disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
               >
                 {isSubmitting ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <FaIcon icon="spinner" size={18} className="animate-spin" />
                     Sending...
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    <FaIcon icon="paper-plane" size={18} />
                     Send Message
                   </>
                 )}
@@ -245,13 +241,11 @@ function ContactPage() {
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-brand-light/30 transition-all duration-300">
                   <div className="w-10 h-10 bg-brand-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                    <FaIcon icon="envelope" size={18} className="text-brand-orange" />
                   </div>
                   <div>
                     <p className="text-text-muted text-xs">Email Us</p>
-                    <a href="mailto:support@merogadget.com" className="text-white text-sm hover:text-brand-orange transition-colors">
+                    <a href="mailto:support@merogadget.com" className="text-text-primary text-sm hover:text-brand-orange transition-colors">
                       support@merogadget.com
                     </a>
                   </div>
@@ -259,13 +253,11 @@ function ContactPage() {
 
                 <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-brand-light/30 transition-all duration-300">
                   <div className="w-10 h-10 bg-brand-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
+                    <FaIcon icon="phone" size={18} className="text-brand-orange" />
                   </div>
                   <div>
                     <p className="text-text-muted text-xs">Call Us</p>
-                    <a href="tel:+9779800000000" className="text-white text-sm hover:text-brand-orange transition-colors">
+                    <a href="tel:+9779800000000" className="text-text-primary text-sm hover:text-brand-orange transition-colors">
                       +977 9800000000
                     </a>
                   </div>
@@ -273,14 +265,11 @@ function ContactPage() {
 
                 <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-brand-light/30 transition-all duration-300">
                   <div className="w-10 h-10 bg-brand-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <FaIcon icon="location-dot" size={18} className="text-brand-orange" />
                   </div>
                   <div>
                     <p className="text-text-muted text-xs">Visit Us</p>
-                    <p className="text-white text-sm">Hall Chowk, Kawasoti-7, Nawalpur, Nepal</p>
+                    <p className="text-text-primary text-sm">Hall Chowk, Kawasoti-7, Nawalpur, Nepal</p>
                   </div>
                 </div>
               </div>
@@ -289,7 +278,7 @@ function ContactPage() {
             {/* Map Card */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-divider shadow-xl overflow-hidden">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-brand-orange text-lg">ðŸ“</span>
+                <FaIcon icon="location-dot" size={18} className="text-brand-orange" />
                 <h3 className="text-text-primary font-semibold">Our Location</h3>
               </div>
               <div className="rounded-xl overflow-hidden">
@@ -313,17 +302,17 @@ function ContactPage() {
             {/* Business Hours */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-divider shadow-xl">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-brand-orange text-lg">â°</span>
+                <FaIcon icon="clock" size={18} className="text-brand-orange" />
                 <h3 className="text-text-primary font-semibold">Business Hours</h3>
               </div>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center py-2 border-b border-divider">
                   <span className="text-text-muted">Monday - Friday</span>
-                  <span className="text-white">10:00 AM - 7:00 PM</span>
+                  <span className="text-text-primary">10:00 AM - 7:00 PM</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-divider">
                   <span className="text-text-muted">Saturday</span>
-                  <span className="text-white">11:00 AM - 5:00 PM</span>
+                  <span className="text-text-primary">11:00 AM - 5:00 PM</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-text-muted">Sunday</span>

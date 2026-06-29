@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import FaIcon from '../common/FaIcon';
 import { categoryService } from '../../services/categoryService';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 const CategoriesDropdown = () => {
   const [categories, setCategories] = useState([]);
@@ -111,7 +113,7 @@ const CategoriesDropdown = () => {
                     e.currentTarget.style.color = 'var(--text-primary)'
                   }}
                 >
-                  <span className="text-lg">{category.icon || '📦'}</span>
+                  <FaIcon icon={getCategoryIcon(category)} size={16} className="text-brand-orange" />
                   <span className="flex-1">{category.name}</span>
                   <span className="text-xs opacity-50">→</span>
                 </Link>

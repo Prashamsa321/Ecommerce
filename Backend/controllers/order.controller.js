@@ -1,6 +1,6 @@
 import Order from '../models/Order.js';
-import Cart from '../models/Cart.js';
-import Product from '../models/Product.js';
+import Cart from '../models/cart.js';
+import Product from '../models/product.js';
 
 // Create new order
 export const createOrder = async (req, res) => {
@@ -8,29 +8,48 @@ export const createOrder = async (req, res) => {
     const userId = req.user._id;
     const { shippingAddress, paymentMethod, notes } = req.body;
 
-    // Get user's cart
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
-    if (!cart || cart.items.length === 0) {
+    if (!shippingAddress?.fullName || !shippingAddress?.email || !shippingAddress?.phone || !shippingAddress?.address || !shippingAddress?.city) {
       return res.status(400).json({
         success: false,
-        message: 'Cart is empty'
+        message: 'Complete shipping address is required',
       });
     }
 
-    // Prepare order items
-    const orderItems = cart.items.map(item => ({
-      productId: item.productId._id,
-      name: item.productId.name,
+    const cart = await Cart.findOne({ userId });
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cart is empty',
+      });
+    }
+
+    const orderItems = cart.items.map((item) => ({
+      productId: item.productId,
+      name: item.name || 'Product',
       price: item.price,
       quantity: item.quantity,
-      image: item.image
+      image: item.image || '',
     }));
 
-    // Create order
+    const allowedPayments = ['COD', 'esewa', 'khalti'];
+    let normalizedPayment = paymentMethod || 'COD';
+    if (normalizedPayment.toUpperCase() === 'COD') {
+      normalizedPayment = 'COD';
+    } else {
+      normalizedPayment = normalizedPayment.toLowerCase();
+    }
+    if (!allowedPayments.includes(normalizedPayment)) {
+      normalizedPayment = 'COD';
+    }
+
+    const totalAmount =
+      cart.totalAmount ||
+      orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
     const order = new Order({
       user: userId,
       items: orderItems,
-      totalAmount: cart.totalAmount,
+      totalAmount,
       shippingAddress: {
         fullName: shippingAddress.fullName,
         email: shippingAddress.email,
@@ -38,22 +57,21 @@ export const createOrder = async (req, res) => {
         address: shippingAddress.address,
         city: shippingAddress.city,
         postalCode: shippingAddress.postalCode || '',
-        country: shippingAddress.country || 'Nepal'
+        country: shippingAddress.country || 'Nepal',
       },
-      paymentMethod: paymentMethod || 'COD',
+      paymentMethod: normalizedPayment,
       notes: notes || '',
       orderStatus: 'pending',
-      paymentStatus: paymentMethod === 'COD' ? 'pending' : 'pending',
+      paymentStatus: normalizedPayment === 'khalti' ? 'paid' : 'pending',
       statusHistory: [{
         status: 'pending',
         comment: 'Order placed successfully',
-        updatedBy: userId
-      }]
+        updatedBy: userId,
+      }],
     });
 
     await order.save();
 
-    // Clear user's cart
     cart.items = [];
     cart.totalAmount = 0;
     await cart.save();
@@ -61,14 +79,14 @@ export const createOrder = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Order placed successfully',
-      order
+      order,
     });
   } catch (error) {
     console.error('Create order error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating order',
-      error: error.message
+      message: error.name === 'ValidationError' ? 'Invalid order data' : 'Error creating order',
+      error: error.message,
     });
   }
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import FaIcon from '../../components/common/FaIcon';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 
@@ -82,13 +83,20 @@ const AdminUsers = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-5 mb-6 border border-divider">
-        <input
-          type="text"
-          placeholder="Search users by name or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2.5 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
-        />
+        <div className="relative">
+          <FaIcon
+            icon="magnifying-glass"
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Search users by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2.5 pl-10 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-divider">
@@ -106,6 +114,7 @@ const AdminUsers = () => {
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-12 text-center text-text-muted">
+                    <FaIcon icon="users" className="text-text-muted mx-auto mb-2" size={40} />
                     <p>No customer users found</p>
                     {searchTerm && (
                       <button
@@ -138,9 +147,7 @@ const AdminUsers = () => {
                         className="text-status-error hover:text-red-700 transition-colors p-1"
                         title="Delete User"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <FaIcon icon="trash" size={18} />
                       </button>
                     </td>
                   </tr>

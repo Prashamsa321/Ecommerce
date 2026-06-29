@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import FaIcon from '../components/common/FaIcon';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
@@ -90,7 +91,7 @@ const CartPage = () => {
       <div className="min-h-screen bg-surface-primary py-16 pb-24">
         <div className="section-container max-w-3xl">
           <div className="text-center card-premium p-12">
-            <div className="text-7xl mb-6">🛒</div>
+            <FaIcon icon="cart-shopping" className="text-brand-orange mb-6" size={56} />
             <h1 className="text-3xl font-bold text-text-primary mb-4">Your Cart is Empty</h1>
             <p className="text-text-secondary mb-8">Looks like you haven't added anything yet</p>
             <Link to="/products" className="btn-cta px-8 py-3">
@@ -120,7 +121,7 @@ const CartPage = () => {
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-3xl">📦</span>
+                        <FaIcon icon="box" className="text-brand-orange/40" size={28} />
                       )}
                     </div>
 

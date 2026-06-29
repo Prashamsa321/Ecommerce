@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Heart, Eye, ShoppingCart, Star } from 'lucide-react'
+import FaIcon from '../common/FaIcon'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
@@ -49,7 +49,9 @@ const ProductCard = ({ product, index = 0 }) => {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-5xl opacity-20">📦</div>
+              <div className="w-full h-full flex items-center justify-center text-brand-orange/30">
+                <FaIcon icon="box" size={48} />
+              </div>
             )}
 
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -64,10 +66,10 @@ const ProductCard = ({ product, index = 0 }) => {
                 }`}
                 aria-label="Wishlist"
               >
-                <Heart size={16} fill={wishlisted ? 'currentColor' : 'none'} />
+                <FaIcon icon="heart" size={16} solid={wishlisted} regular={!wishlisted} className={wishlisted ? 'text-white' : ''} />
               </button>
               <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-white text-text-secondary border border-divider shadow-soft">
-                <Eye size={16} />
+                <FaIcon icon="eye" size={16} />
               </span>
             </div>
 
@@ -79,7 +81,7 @@ const ProductCard = ({ product, index = 0 }) => {
                   opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300
                   flex items-center justify-center gap-2 hover:shadow-glow-orange disabled:opacity-60"
               >
-                <ShoppingCart size={15} />
+                <FaIcon icon="cart-shopping" size={15} />
                 {isAdding ? 'Adding...' : 'Quick Add'}
               </button>
             )}
@@ -100,7 +102,7 @@ const ProductCard = ({ product, index = 0 }) => {
             <div className="flex items-center gap-1.5 mb-3">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={12} className={i < Math.floor(rating) ? 'text-brand-amber fill-brand-amber' : 'text-divider'} />
+                  <FaIcon key={i} icon="star" size={12} className={i < Math.floor(rating) ? 'text-brand-amber' : 'text-divider'} />
                 ))}
               </div>
               <span className="text-xs text-text-muted">({rating})</span>

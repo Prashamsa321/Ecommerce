@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { productService } from '../../services/productService';
 import { categoryService } from '../../services/categoryService';
+import CategorySelect from '../../components/common/CategorySelect';
 
 const CreateProductPage = () => {
   const { id } = useParams();
@@ -102,7 +103,7 @@ const CreateProductPage = () => {
 
   const formatPriceDisplay = (value) => {
     if (!value) return '';
-    return `à¤°à¥‚ ${parseFloat(value).toLocaleString('en-IN')}`;
+    return `\u0930\u0942 ${parseFloat(value).toLocaleString('en-IN')}`;
   };
 
   const handleSubmit = async (e) => {
@@ -213,10 +214,10 @@ const CreateProductPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
-              Price * (Nepali Rupees - à¤°à¥‚)
+              Price * (Nepali Rupees - {'\u0930\u0942'})
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-3 text-text-muted font-semibold">à¤°à¥‚</span>
+              <span className="absolute left-3 top-3 text-text-muted font-semibold">{'\u0930\u0942'}</span>
               <input
                 type="number"
                 name="price"
@@ -257,24 +258,14 @@ const CreateProductPage = () => {
           <label className="block text-sm font-medium text-text-secondary mb-2">
             Category *
           </label>
-          <select
-            name="category"
+          <CategorySelect
+            categories={categories}
             value={formData.category}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-surface-primary border border-divider rounded-lg text-text-primary focus:ring-2 focus:ring-brand-orange focus:border-transparent cursor-pointer"
-            required
-          >
-            <option value="">Select a category</option>
-            {categories.length === 0 ? (
-              <option value="" disabled>No categories available. Please add categories first.</option>
-            ) : (
-              categories.map((category) => (
-                <option key={category._id} value={category.name}>
-                  {category.icon || 'ðŸ“¦'} {category.name}
-                </option>
-              ))
-            )}
-          </select>
+            onChange={(categoryName) =>
+              setFormData((prev) => ({ ...prev, category: categoryName }))
+            }
+            disabled={categories.length === 0}
+          />
           {categories.length === 0 && (
             <p className="text-xs text-red-400 mt-1">
               No categories found. Please add categories in the Categories page first.

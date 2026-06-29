@@ -44,7 +44,7 @@ export const createCategory = async (req, res) => {
     
     const category = new Category({
       name: name.trim(),
-      icon: icon || '📦'
+      icon: icon || 'box'
     });
     
     await category.save();

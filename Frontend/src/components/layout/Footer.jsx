@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import FaIcon from '../common/FaIcon'
 
 const Footer = () => {
   const year = new Date().getFullYear()
@@ -52,9 +53,18 @@ const Footer = () => {
           <div>
             <h4 className="text-text-primary font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-text-muted">
-              <li>📧 support@merogadget.com</li>
-              <li>📞 +977 9800000000</li>
-              <li>📍 Kathmandu, Nepal</li>
+              <li className="flex items-center gap-2">
+                <FaIcon icon="envelope" size={14} className="text-brand-orange" />
+                support@merogadget.com
+              </li>
+              <li className="flex items-center gap-2">
+                <FaIcon icon="phone" size={14} className="text-brand-orange" />
+                +977 9800000000
+              </li>
+              <li className="flex items-center gap-2">
+                <FaIcon icon="location-dot" size={14} className="text-brand-orange" />
+                Kathmandu, Nepal
+              </li>
             </ul>
           </div>
         </div>

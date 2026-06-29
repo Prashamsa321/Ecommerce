@@ -1,27 +1,12 @@
-import {
-  LayoutDashboard,
-  Package,
-  List,
-  PlusCircle,
-  Tags,
-  ShoppingCart,
-  Users,
-  Mail,
-  BarChart3,
-  Settings,
-  Lock,
-  ShieldCheck,
-} from 'lucide-react'
-
 export const adminNavGroups = [
   {
     label: 'Main',
     items: [
-      { path: '/admin', name: 'Dashboard', icon: LayoutDashboard, dropdown: false },
-      { path: '/admin/reports', name: 'Reports', icon: BarChart3, dropdown: false },
-      { path: '/admin/orders', name: 'Orders', icon: ShoppingCart, dropdown: false },
-      { path: '/admin/users', name: 'Users', icon: Users, dropdown: false },
-      { path: '/admin/contacts', name: 'Contacts', icon: Mail, dropdown: false },
+      { path: '/admin', name: 'Dashboard', icon: 'gauge-high', dropdown: false },
+      { path: '/admin/reports', name: 'Reports', icon: 'chart-column', dropdown: false },
+      { path: '/admin/orders', name: 'Orders', icon: 'cart-shopping', dropdown: false },
+      { path: '/admin/users', name: 'Users', icon: 'users', dropdown: false },
+      { path: '/admin/contacts', name: 'Contacts', icon: 'envelope', dropdown: false },
     ],
   },
   {
@@ -30,12 +15,12 @@ export const adminNavGroups = [
       {
         path: '#',
         name: 'Products',
-        icon: Package,
+        icon: 'box',
         dropdown: true,
         dropdownItems: [
-          { path: '/admin/products', name: 'All Products', icon: List },
-          { path: '/admin/products/create', name: 'Create Product', icon: PlusCircle },
-          { path: '/admin/categories', name: 'Categories', icon: Tags },
+          { path: '/admin/products', name: 'All Products', icon: 'list' },
+          { path: '/admin/products/create', name: 'Create Product', icon: 'circle-plus' },
+          { path: '/admin/categories', name: 'Categories', icon: 'tags' },
         ],
       },
     ],
@@ -46,11 +31,11 @@ export const adminNavGroups = [
       {
         path: '#',
         name: 'Settings',
-        icon: Settings,
+        icon: 'gear',
         dropdown: true,
         dropdownItems: [
-          { path: '/admin/settings', name: 'Security', icon: Lock },
-          { path: '/admin/settings/roles', name: 'Role Management', icon: ShieldCheck },
+          { path: '/admin/settings', name: 'Security', icon: 'lock' },
+          { path: '/admin/settings/roles', name: 'Role Management', icon: 'shield-halved' },
         ],
       },
     ],

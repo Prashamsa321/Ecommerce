@@ -41,5 +41,5 @@ const cartSchema = new mongoose.Schema({
 })
 
 // Remove any pre-save hooks and keep it simple
-const Cart = mongoose.model('Cart', cartSchema)
+const Cart = mongoose.models.Cart || mongoose.model('Cart', cartSchema)
 export default Cart

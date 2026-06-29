@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import FaIcon from '../../components/common/FaIcon';
 import { productService } from '../../services/productService';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
@@ -81,7 +82,7 @@ const AdminProducts = () => {
         await productService.deleteProduct(productToDelete._id);
         success('Product deleted successfully');
         fetchProducts();
-      } catch (err) {
+      } catch {
         error('Failed to delete product');
       } finally {
         setModalOpen(false);
@@ -108,7 +109,6 @@ const AdminProducts = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Products Management</h1>
@@ -118,14 +118,19 @@ const AdminProducts = () => {
           to="/admin/products/create"
           className="bg-gradient-to-r from-brand-orange to-brand-orange-dark text-white px-5 py-2.5 rounded-lg hover:from-brand-orange-dark hover:to-brand-orange transition-all duration-300 flex items-center gap-2 shadow-md"
         >
-          <span className="text-xl">+</span> Add New Product
+          <FaIcon icon="plus" size={16} />
+          Add New Product
         </Link>
       </div>
 
-      {/* Search and Results Info */}
       <div className="bg-white rounded-xl shadow-lg p-5 border border-divider">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="relative flex-1">
+            <FaIcon
+              icon="magnifying-glass"
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+            />
             <input
               type="text"
               placeholder="Search products by name or category..."
@@ -136,7 +141,6 @@ const AdminProducts = () => {
               }}
               className="w-full px-4 py-2.5 pl-10 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
             />
-            <span className="absolute left-3 top-3 text-text-muted">ðŸ”</span>
           </div>
           <div className="text-sm text-text-muted flex items-center">
             Total: <span className="text-text-primary font-semibold ml-1 mr-1">{totalProducts}</span> products
@@ -144,10 +148,9 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      {/* Products Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-divider">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-700">
+          <table className="min-w-full divide-y divide-divider">
             <thead className="bg-surface-primary">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Product</th>
@@ -157,11 +160,11 @@ const AdminProducts = () => {
                 <th className="px-6 py-4 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-700">
+            <tbody className="bg-white divide-y divide-divider">
               {currentProducts.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-text-muted">
-                    <div className="text-5xl mb-2">ðŸ“¦</div>
+                    <FaIcon icon="box" className="text-text-muted mx-auto mb-2" size={40} />
                     <p>No products found</p>
                     {searchTerm && (
                       <button
@@ -186,11 +189,11 @@ const AdminProducts = () => {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-text-muted text-xl">ðŸ“¦</span>
+                            <FaIcon icon="box" size={20} className="text-text-muted" />
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">{product.name?.substring(0, 30)}</p>
+                          <p className="text-sm font-medium text-text-primary">{product.name?.substring(0, 30)}</p>
                           <p className="text-xs text-text-muted truncate max-w-xs">
                             {product.description?.substring(0, 50)}...
                           </p>
@@ -198,17 +201,17 @@ const AdminProducts = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium bg-brand-light0/20 text-brand-orange rounded-full border border-brand-orange/20">
+                      <span className="px-2 py-1 text-xs font-medium bg-brand-light text-brand-orange rounded-full border border-brand-orange/20">
                         {product.category || 'Uncategorized'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-semibold text-brand-orange">
-                        à¤°à¥‚ {product.price?.toLocaleString('en-IN') || '0'}
+                        {'\u0930\u0942'} {product.price?.toLocaleString('en-IN') || '0'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
                         {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                       </span>
                     </td>
@@ -219,18 +222,14 @@ const AdminProducts = () => {
                           className="text-brand-orange hover:text-brand-orange-dark transition-colors p-1"
                           title="Edit Product"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          <FaIcon icon="pen-to-square" size={18} />
                         </Link>
                         <button
                           onClick={() => openDeleteModal(product)}
                           className="text-red-400 hover:text-red-300 transition-colors p-1"
                           title="Delete Product"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          <FaIcon icon="trash" size={18} />
                         </button>
                       </div>
                     </td>
@@ -242,7 +241,6 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
           <div className="text-sm text-text-muted">
@@ -318,7 +316,6 @@ const AdminProducts = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={handleCancelDelete}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import FaIcon from '../../components/common/FaIcon'
 import {
   AreaChart,
   Area,
@@ -18,20 +19,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import {
-  RefreshCw,
-  TrendingUp,
-  Package,
-  ShoppingCart,
-  Users,
-  Wallet,
-  AlertTriangle,
-  Mail,
-  BarChart3,
-  Boxes,
-  Target,
-  ArrowUpRight,
-} from 'lucide-react'
 import { useToast } from '../../context/ToastContext'
 import { fetchAdminReports } from '../../services/adminReportService'
 import { formatNpr } from '../../utils/helpers'
@@ -53,7 +40,7 @@ const statusBadge = (status) => {
   )
 }
 
-const KpiCard = ({ title, value, icon: Icon, iconBg, iconColor, sub }) => (
+const KpiCard = ({ title, value, icon, iconBg, iconColor, sub }) => (
   <div className="admin-stat-card">
     <div className="flex items-start justify-between gap-3">
       <div>
@@ -62,7 +49,7 @@ const KpiCard = ({ title, value, icon: Icon, iconBg, iconColor, sub }) => (
         {sub && <p className="mt-1 text-xs text-text-muted">{sub}</p>}
       </div>
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
-        <Icon className={`h-5 w-5 ${iconColor}`} strokeWidth={2} />
+        <FaIcon icon={icon} size={20} className={iconColor} />
       </div>
     </div>
   </div>
@@ -72,14 +59,18 @@ const AdminReports = () => {
   const { error: toastError } = useToast()
   const [reports, setReports] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
 
   const loadReports = async () => {
     try {
       setLoading(true)
+      setLoadError(null)
       const data = await fetchAdminReports()
       setReports(data)
     } catch (err) {
       console.error(err)
+      setReports(null)
+      setLoadError(err.response?.data?.message || 'Failed to load reports')
       toastError('Failed to load reports')
     } finally {
       setLoading(false)
@@ -108,7 +99,21 @@ const AdminReports = () => {
     )
   }
 
-  if (!reports) return null
+  if (!reports) {
+    return (
+      <div className="admin-card flex flex-col items-center justify-center gap-4 p-10 text-center">
+        <FaIcon icon="chart-column" size={40} className="text-brand-orange" />
+        <div>
+          <h2 className="text-lg font-semibold text-text-primary">Unable to load reports</h2>
+          <p className="mt-1 text-sm text-text-muted">{loadError || 'Something went wrong while fetching report data.'}</p>
+        </div>
+        <button type="button" onClick={loadReports} className="btn-cta inline-flex items-center gap-2">
+          <FaIcon icon="arrows-rotate" size={16} />
+          Try Again
+        </button>
+      </div>
+    )
+  }
 
   const { overview, revenueGrowth, userGrowth, orderStatusCounts, paymentMethodCounts, productsByCategory, lowStockProducts, contactStats, recentOrders, orderStats } = reports
 
@@ -125,7 +130,7 @@ const AdminReports = () => {
       >
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-cta text-white shadow-glow-orange">
-            <BarChart3 className="h-6 w-6" />
+            <FaIcon icon="chart-column" size={24} />
           </div>
           <div>
             <h2 className="text-xl font-bold text-text-primary sm:text-2xl">Business Reports</h2>
@@ -137,21 +142,21 @@ const AdminReports = () => {
           onClick={loadReports}
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-divider bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-brand-orange/30 hover:text-brand-orange"
         >
-          <RefreshCw className="h-4 w-4" />
+          <FaIcon icon="arrows-rotate" size={16} />
           Refresh Reports
         </button>
       </motion.div>
 
       {/* Section 2: Overview KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard title="Total Revenue" value={formatNpr(overview.totalRevenue)} icon={Wallet} iconBg="bg-amber-50" iconColor="text-brand-amber" sub="All non-cancelled orders" />
-        <KpiCard title="Total Orders" value={overview.totalOrders.toLocaleString()} icon={ShoppingCart} iconBg="bg-brand-light" iconColor="text-brand-orange" />
-        <KpiCard title="Store Users" value={overview.totalUsers.toLocaleString()} icon={Users} iconBg="bg-purple-50" iconColor="text-purple-600" />
-        <KpiCard title="Products" value={overview.totalProducts.toLocaleString()} icon={Package} iconBg="bg-orange-50" iconColor="text-brand-orange-dark" />
-        <KpiCard title="Avg Order Value" value={formatNpr(overview.avgOrderValue)} icon={Target} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
-        <KpiCard title="Fulfillment Rate" value={`${overview.fulfillmentRate}%`} icon={TrendingUp} iconBg="bg-emerald-50" iconColor="text-emerald-600" sub="Delivered orders" />
-        <KpiCard title="Inventory Value" value={formatNpr(overview.inventoryValue)} icon={Boxes} iconBg="bg-blue-50" iconColor="text-blue-600" />
-        <KpiCard title="Low Stock Items" value={overview.lowStockCount.toLocaleString()} icon={AlertTriangle} iconBg="bg-red-50" iconColor="text-red-500" sub={`${overview.outOfStockCount} out of stock`} />
+        <KpiCard title="Total Revenue" value={formatNpr(overview.totalRevenue)} icon="wallet" iconBg="bg-amber-50" iconColor="text-brand-amber" sub="All non-cancelled orders" />
+        <KpiCard title="Total Orders" value={overview.totalOrders.toLocaleString()} icon="cart-shopping" iconBg="bg-brand-light" iconColor="text-brand-orange" />
+        <KpiCard title="Store Users" value={overview.totalUsers.toLocaleString()} icon="users" iconBg="bg-purple-50" iconColor="text-purple-600" />
+        <KpiCard title="Products" value={overview.totalProducts.toLocaleString()} icon="box" iconBg="bg-orange-50" iconColor="text-brand-orange-dark" />
+        <KpiCard title="Avg Order Value" value={formatNpr(overview.avgOrderValue)} icon="bullseye" iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+        <KpiCard title="Fulfillment Rate" value={`${overview.fulfillmentRate}%`} icon="chart-line" iconBg="bg-emerald-50" iconColor="text-emerald-600" sub="Delivered orders" />
+        <KpiCard title="Inventory Value" value={formatNpr(overview.inventoryValue)} icon="boxes-stacked" iconBg="bg-blue-50" iconColor="text-blue-600" />
+        <KpiCard title="Low Stock Items" value={overview.lowStockCount.toLocaleString()} icon="triangle-exclamation" iconBg="bg-red-50" iconColor="text-red-500" sub={`${overview.outOfStockCount} out of stock`} />
       </div>
 
       {/* Section 3 & 4: Revenue + Orders growth */}
@@ -203,6 +208,9 @@ const AdminReports = () => {
       {/* Section 6 & 7: Order status + Payment methods */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <AdminChartCard title="Order Status Distribution" subtitle="Breakdown by fulfillment stage">
+          {orderStatusChart.length === 0 ? (
+            <p className="flex h-[280px] items-center justify-center text-sm text-text-muted">No order data yet</p>
+          ) : (
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={orderStatusChart} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3}>
@@ -214,9 +222,13 @@ const AdminReports = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
+          )}
         </AdminChartCard>
 
         <AdminChartCard title="Payment Methods" subtitle="COD vs eSewa usage">
+          {paymentChart.length === 0 ? (
+            <p className="flex h-[280px] items-center justify-center text-sm text-text-muted">No payment data yet</p>
+          ) : (
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={paymentChart} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={95} paddingAngle={4}>
@@ -228,6 +240,7 @@ const AdminReports = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
+          )}
         </AdminChartCard>
       </div>
 
@@ -264,7 +277,7 @@ const AdminReports = () => {
       {/* Section 10: Low stock alert banner */}
       {overview.outOfStockCount > 0 && (
         <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 sm:items-center">
-          <AlertTriangle className="h-5 w-5 shrink-0 text-red-500" />
+          <FaIcon icon="triangle-exclamation" size={20} className="shrink-0 text-red-500" />
           <div className="flex-1">
             <p className="font-semibold text-red-700">{overview.outOfStockCount} product(s) are out of stock</p>
             <p className="text-sm text-red-600">Restock immediately to avoid lost sales.</p>
@@ -281,7 +294,7 @@ const AdminReports = () => {
         subtitle="Items with 10 or fewer units remaining"
         action={
           <Link to="/admin/products" className="inline-flex items-center gap-1 text-sm font-medium text-brand-orange hover:text-brand-orange-dark">
-            View All <ArrowUpRight className="h-4 w-4" />
+            View All <FaIcon icon="arrow-up-right-from-square" size={16} />
           </Link>
         }
       >
@@ -307,7 +320,7 @@ const AdminReports = () => {
                           <img src={p.image} alt={p.name} className="h-10 w-10 rounded-lg object-cover" />
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-light">
-                            <Package className="h-4 w-4 text-brand-orange" />
+                            <FaIcon icon="box" size={16} className="text-brand-orange" />
                           </div>
                         )}
                         <span className="font-medium text-text-primary">{p.name}</span>
@@ -334,7 +347,7 @@ const AdminReports = () => {
         subtitle="Latest transactions across the store"
         action={
           <Link to="/admin/orders" className="inline-flex items-center gap-1 text-sm font-medium text-brand-orange hover:text-brand-orange-dark">
-            All Orders <ArrowUpRight className="h-4 w-4" />
+            All Orders <FaIcon icon="arrow-up-right-from-square" size={16} />
           </Link>
         }
       >
@@ -371,14 +384,14 @@ const AdminReports = () => {
       <AdminChartCard title="Contact Messages" subtitle="Customer inquiry overview">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: 'Total', value: contactStats.total, icon: Mail, bg: 'bg-brand-light', color: 'text-brand-orange' },
-            { label: 'Pending', value: contactStats.pending, icon: Mail, bg: 'bg-amber-50', color: 'text-amber-600' },
-            { label: 'Read', value: contactStats.read, icon: Mail, bg: 'bg-blue-50', color: 'text-blue-600' },
-            { label: 'Replied', value: contactStats.replied, icon: Mail, bg: 'bg-emerald-50', color: 'text-emerald-600' },
+            { label: 'Total', value: contactStats.total, icon: 'envelope', bg: 'bg-brand-light', color: 'text-brand-orange' },
+            { label: 'Pending', value: contactStats.pending, icon: 'envelope', bg: 'bg-amber-50', color: 'text-amber-600' },
+            { label: 'Read', value: contactStats.read, icon: 'envelope', bg: 'bg-blue-50', color: 'text-blue-600' },
+            { label: 'Replied', value: contactStats.replied, icon: 'envelope', bg: 'bg-emerald-50', color: 'text-emerald-600' },
           ].map((c) => (
             <div key={c.label} className="rounded-xl bg-surface-primary p-4 text-center">
               <div className={`mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-lg ${c.bg}`}>
-                <c.icon className={`h-4 w-4 ${c.color}`} />
+                <FaIcon icon={c.icon} size={16} className={c.color} />
               </div>
               <p className="text-2xl font-bold tabular-nums text-text-primary">{c.value}</p>
               <p className="text-xs text-text-muted">{c.label}</p>
@@ -386,7 +399,7 @@ const AdminReports = () => {
           ))}
         </div>
         <Link to="/admin/contacts" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-orange hover:text-brand-orange-dark">
-          View Contacts <ArrowUpRight className="h-4 w-4" />
+          View Contacts <FaIcon icon="arrow-up-right-from-square" size={16} />
         </Link>
       </AdminChartCard>
     </div>

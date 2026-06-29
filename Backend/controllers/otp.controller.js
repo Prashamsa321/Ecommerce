@@ -1,81 +1,97 @@
 import OTP from '../models/OTP.js';
-import User from '../models/User.js';
+import User from '../models/user.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { sendOTPEmail } from '../services/emailService.js';
 
 const isDev = process.env.NODE_ENV !== 'production';
+
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+const toPublicUser = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  lastLogin: user.lastLogin || null,
+});
 
 const buildOtpResponse = (message, email, otp, emailResult) => ({
   success: true,
   message,
   email,
   emailSent: Boolean(emailResult?.sent),
-  ...(isDev ? { devOTP: otp } : {}),
+  ...(isDev && !emailResult?.sent ? { devOTP: otp } : {}),
   ...(emailResult?.previewUrl ? { emailPreviewUrl: emailResult.previewUrl } : {}),
   ...(emailResult?.usedDevFallback ? { usedDevFallback: true } : {}),
 });
 
-// Generate random OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-// Send OTP for registration
 export const sendRegistrationOTP = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const name = req.body.name?.trim();
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
 
-    console.log('Received registration request:', { name, email });
-
-    // Validate input
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required'
+        message: 'All fields are required',
       });
     }
 
-    // Check if user already exists
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters',
+      });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email'
+        message: 'User already exists with this email',
       });
     }
 
-    // Generate OTP
     const otp = generateOTP();
-    console.log(`Generated OTP for ${email}: ${otp}`);
-    
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Delete any existing OTP for this email
     await OTP.deleteMany({ email });
 
-    // Store OTP with user data
     await OTP.create({
       email,
       otp,
       userData: {
         name,
         email,
-        password: hashedPassword
+        password: hashedPassword,
       },
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
     const emailResult = await sendOTPEmail(email, otp, name);
 
+    if (!emailResult.sent && !isDev && !emailResult.previewUrl) {
+      await OTP.deleteMany({ email });
+      return res.status(503).json({
+        success: false,
+        message: 'Could not send verification email. Please check email settings and try again.',
+      });
+    }
+
     res.status(200).json(
       buildOtpResponse(
         emailResult.sent
-          ? 'OTP sent successfully to your email'
+          ? `Verification code sent to ${email}`
           : emailResult.previewUrl
-            ? 'Email preview ready — open the link below to view your OTP'
+            ? 'Email preview ready — open the link below to view your verification code'
             : isDev
-              ? 'OTP generated — use the code shown on screen'
+              ? 'Verification code generated — check your email or use the code shown on screen'
               : 'Could not send email. Check server email settings and try again.',
         email,
         otp,
@@ -86,102 +102,122 @@ export const sendRegistrationOTP = async (req, res) => {
     console.error('Send OTP error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error sending OTP',
-      error: error.message
+      message: 'Error sending verification code',
+      error: error.message,
     });
   }
 };
 
-// Verify OTP
 export const verifyOTP = async (req, res) => {
   try {
-    const { email, otp } = req.body;
-
-    console.log('Verifying OTP:', { email, otp });
+    const email = req.body.email?.toLowerCase().trim();
+    const otp = req.body.otp?.trim();
 
     if (!email || !otp) {
       return res.status(400).json({
         success: false,
-        message: 'Email and OTP are required'
+        message: 'Email and verification code are required',
       });
     }
 
-    // Find OTP record
     const otpRecord = await OTP.findOne({ email, otp });
 
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid OTP'
+        message: 'Invalid verification code',
       });
     }
 
-    // Check if OTP is expired
     if (otpRecord.expiresAt < new Date()) {
       await OTP.deleteOne({ _id: otpRecord._id });
       return res.status(400).json({
         success: false,
-        message: 'OTP has expired. Please request a new one.'
+        message: 'Verification code has expired. Please request a new one.',
       });
     }
 
-    // OTP is valid, return user data for registration
-    res.status(200).json({
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email',
+      });
+    }
+
+    const { name, password } = otpRecord.userData;
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: 'user',
+      lastLogin: new Date(),
+    });
+
+    await OTP.deleteOne({ _id: otpRecord._id });
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
       success: true,
-      message: 'OTP verified successfully',
-      userData: otpRecord.userData
+      message: 'Registration successful',
+      token,
+      user: toPublicUser(user),
     });
   } catch (error) {
     console.error('Verify OTP error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error verifying OTP',
-      error: error.message
+      message: 'Error verifying code',
+      error: error.message,
     });
   }
 };
 
-// Resend OTP
 export const resendOTP = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Email is required'
+        message: 'Email is required',
       });
     }
 
-    // Find existing OTP record
     const otpRecord = await OTP.findOne({ email });
 
     if (!otpRecord) {
       return res.status(404).json({
         success: false,
-        message: 'No registration found for this email'
+        message: 'No registration found for this email. Please start again.',
       });
     }
 
-    // Generate new OTP
     const newOTP = generateOTP();
-    console.log(`Resending OTP for ${email}: ${newOTP}`);
-
-    // Update OTP
     otpRecord.otp = newOTP;
     otpRecord.expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await otpRecord.save();
 
     const emailResult = await sendOTPEmail(email, newOTP, otpRecord.userData.name);
 
+    if (!emailResult.sent && !isDev && !emailResult.previewUrl) {
+      return res.status(503).json({
+        success: false,
+        message: 'Could not resend verification email. Please try again later.',
+      });
+    }
+
     res.status(200).json(
       buildOtpResponse(
         emailResult.sent
-          ? 'OTP resent successfully to your email'
+          ? `New verification code sent to ${email}`
           : emailResult.previewUrl
-            ? 'Email preview ready — open the link below to view your OTP'
+            ? 'Email preview ready — open the link below to view your verification code'
             : isDev
-              ? 'New OTP generated — use the code shown on screen'
+              ? 'New verification code generated'
               : 'Could not send email. Check server email settings and try again.',
         email,
         newOTP,
@@ -192,8 +228,8 @@ export const resendOTP = async (req, res) => {
     console.error('Resend OTP error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error resending OTP',
-      error: error.message
+      message: 'Error resending verification code',
+      error: error.message,
     });
   }
 };

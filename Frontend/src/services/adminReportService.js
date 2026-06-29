@@ -76,7 +76,7 @@ const buildReportsFromLegacyEndpoints = async () => {
     status,
   }))
 
-  const paymentMethodCounts = ['COD', 'esewa'].map((method) => ({
+  const paymentMethodCounts = ['COD', 'esewa', 'khalti'].map((method) => ({
     name: method,
     value: orders.filter((o) => (o.paymentMethod || 'COD').toLowerCase() === method.toLowerCase()).length,
   }))
@@ -172,9 +172,16 @@ export const fetchAdminReports = async () => {
   } catch (error) {
     const status = error.response?.status
     if (status && status !== 404 && status !== 502 && status !== 503) {
-      throw error
+      // Try legacy endpoints before failing (e.g. stale backend without /admin/reports)
+      if (status !== 401 && status !== 403) {
+        throw error
+      }
     }
   }
 
-  return buildReportsFromLegacyEndpoints()
+  try {
+    return await buildReportsFromLegacyEndpoints()
+  } catch (fallbackError) {
+    throw fallbackError
+  }
 }

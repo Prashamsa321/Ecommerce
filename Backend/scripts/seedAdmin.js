@@ -35,7 +35,7 @@ const seedAdmin = async () => {
     console.log(`  Name:     ${admin.name}`)
     console.log(`  Role:     ${admin.role}`)
     console.log(`  Password: ${ADMIN_PASSWORD} (from ADMIN_PASSWORD in .env or default)`)
-    console.log('\nLogin at http://localhost:3000/admin/login')
+    console.log('\nLogin at http://localhost:3000/login')
 
     process.exit(0)
   } catch (error) {

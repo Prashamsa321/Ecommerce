@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);

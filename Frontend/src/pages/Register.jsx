@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { otpService } from '../services/otpService';
 
 const RegisterPage = () => {
-  const { register } = useAuth();
+  const { setAuthSession } = useAuth();
   const { success, error: toastError, info } = useToast();
   const navigate = useNavigate();
   
@@ -70,16 +70,15 @@ const RegisterPage = () => {
       
       if (result.success) {
         if (result.emailSent) {
-          success('OTP sent to your email!');
+          success(`Verification code sent to ${formData.email}`);
         } else if (result.emailPreviewUrl) {
           success('Email preview is ready');
           info('Open the preview link below to view your verification email.');
         } else if (result.devOTP) {
           success('Verification code generated');
-          info(`Your code: ${result.devOTP}`);
-          console.log('Development OTP:', result.devOTP);
+          info(`Development code: ${result.devOTP}`);
         } else {
-          info(result.message || 'OTP generated. Please check your email.');
+          info(result.message || 'Verification code generated. Please check your email.');
         }
         setOtpEmail(formData.email);
         if (result.devOTP) setDevOtp(result.devOTP);
@@ -120,26 +119,16 @@ const RegisterPage = () => {
     try {
       const result = await otpService.verifyOTP(otpEmail, otp);
       
-      if (result.success) {
-        // Now register the user with the verified data
-        const registerResult = await register(
-          result.userData.name,
-          otpEmail,
-          result.userData.password
-        );
-        
-        if (registerResult.success) {
-          success('Account created successfully!');
-          if (registerResult.user?.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/');
-          }
+      if (result.success && result.token && result.user) {
+        setAuthSession(result.token, result.user);
+        success('Account created successfully!');
+        if (result.user?.role === 'admin') {
+          navigate('/admin');
         } else {
-          toastError(registerResult.error || 'Registration failed');
+          navigate('/');
         }
       } else {
-        toastError(result.message || 'Invalid OTP. Please try again.');
+        toastError(result.message || 'Invalid verification code. Please try again.');
       }
     } catch (err) {
       toastError(err.response?.data?.message || 'Invalid OTP. Please try again.');
@@ -154,12 +143,12 @@ const RegisterPage = () => {
       const result = await otpService.resendOTP(otpEmail);
       if (result.success) {
         if (result.emailSent) {
-          success('OTP resent successfully!');
+          success(`Verification code resent to ${otpEmail}`);
         } else if (result.devOTP) {
-          success('New OTP generated');
-          info(`Your verification code: ${result.devOTP}`);
+          success('New verification code generated');
+          info(`Development code: ${result.devOTP}`);
         } else {
-          info(result.message || 'OTP resent');
+          info(result.message || 'Verification code resent');
         }
         setCountdown(60);
         startCountdown();
@@ -274,7 +263,7 @@ const RegisterPage = () => {
                     </svg>
                     Sending OTP...
                   </span>
-                ) : 'Continue'}
+                ) : 'Send Verification Code'}
               </button>
               
               <div className="text-center">
@@ -295,8 +284,11 @@ const RegisterPage = () => {
               </div>
               <h2 className="text-3xl font-bold text-text-primary mb-2">Verify Email</h2>
               <p className="text-text-secondary">
-                Enter the 6-digit code sent to<br />
+                We sent a 6-digit code to<br />
                 <span className="text-brand-orange font-medium">{otpEmail}</span>
+              </p>
+              <p className="text-xs text-text-muted mt-2">
+                Check your inbox and spam folder. The code expires in 10 minutes.
               </p>
               {devOtp && (
                 <div className="mt-4 p-3 rounded-xl bg-brand-light border border-brand-orange/20">

@@ -760,9 +760,24 @@
 
 .admin-shell {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+html.admin-layout-active,
+body.admin-layout-active {
+  overflow: hidden;
+  height: 100%;
+}
+
+html.admin-layout-active #root {
+  height: 100%;
+  overflow: hidden;
 }
 
 .admin-header {
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -776,10 +791,14 @@
 
 .admin-main {
   scroll-behavior: smooth;
+  min-height: 0;
+  overscroll-behavior: contain;
+  background-color: #f1f5f9;
 }
 
 .admin-content {
   animation: admin-fade-in 0.35s ease-out;
+  min-height: 100%;
 }
 
 @keyframes admin-fade-in {

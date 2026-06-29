@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import FaIcon from '../../components/common/FaIcon';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { isProtectedAdmin } from '../../utils/adminConstants';
@@ -86,19 +87,29 @@ const AdminRoleManagement = () => {
         <p className="text-text-muted mt-1">Assign admin or user roles to accounts</p>
       </div>
 
-      <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        <span className="font-medium">Protected admin:</span>{' '}
-        prashamsalamsal2061@gmail.com — this account always stays admin and cannot be demoted.
+      <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex items-start gap-2">
+        <FaIcon icon="shield-halved" size={16} className="text-amber-700 mt-0.5 shrink-0" />
+        <p>
+          <span className="font-medium">Protected admin:</span>{' '}
+          prashamsalamsal2061@gmail.com — this account always stays admin and cannot be demoted.
+        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-5 mb-6 border border-divider">
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2.5 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
-        />
+        <div className="relative">
+          <FaIcon
+            icon="magnifying-glass"
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2.5 pl-10 bg-surface-primary border border-divider rounded-lg text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-orange focus:border-transparent"
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-divider">
@@ -115,7 +126,10 @@ const AdminRoleManagement = () => {
             <tbody className="divide-y divide-divider">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-text-muted">No accounts found</td>
+                  <td colSpan="4" className="px-6 py-12 text-center text-text-muted">
+                    <FaIcon icon="user-shield" className="text-text-muted mx-auto mb-2" size={40} />
+                    <p>No accounts found</p>
+                  </td>
                 </tr>
               ) : (
                 filteredUsers.map((user) => {
@@ -132,18 +146,22 @@ const AdminRoleManagement = () => {
                           <div>
                             <p className="text-sm font-medium text-text-primary">{user.name || 'N/A'}</p>
                             {protectedAccount && (
-                              <span className="text-[10px] uppercase tracking-wide text-amber-700 font-semibold">Protected</span>
+                              <span className="text-[10px] uppercase tracking-wide text-amber-700 font-semibold inline-flex items-center gap-1">
+                                <FaIcon icon="lock" size={10} />
+                                Protected
+                              </span>
                             )}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">{user.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${
                           isAdmin
                             ? 'bg-purple-100 text-purple-700 border border-purple-200'
                             : 'bg-brand-light text-brand-orange border border-brand-orange/20'
                         }`}>
+                          <FaIcon icon={isAdmin ? 'shield-halved' : 'user'} size={12} />
                           {user.role || 'user'}
                         </span>
                       </td>
@@ -152,21 +170,26 @@ const AdminRoleManagement = () => {
                           {!isAdmin && (
                             <button
                               onClick={() => openRoleModal(user, 'admin')}
-                              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
+                              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors inline-flex items-center gap-1"
                             >
+                              <FaIcon icon="shield-halved" size={12} />
                               Make Admin
                             </button>
                           )}
                           {isAdmin && !protectedAccount && (
                             <button
                               onClick={() => openRoleModal(user, 'user')}
-                              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-light text-text-secondary hover:bg-divider transition-colors"
+                              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-light text-text-secondary hover:bg-divider transition-colors inline-flex items-center gap-1"
                             >
+                              <FaIcon icon="user" size={12} />
                               Make User
                             </button>
                           )}
                           {protectedAccount && (
-                            <span className="text-xs text-text-muted italic">Locked as admin</span>
+                            <span className="text-xs text-text-muted italic inline-flex items-center gap-1">
+                              <FaIcon icon="lock" size={12} />
+                              Locked as admin
+                            </span>
                           )}
                         </div>
                       </td>

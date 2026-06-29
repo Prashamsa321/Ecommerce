@@ -1,21 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import {
-  Package,
-  ShoppingCart,
-  Users,
-  Wallet,
-  HandMetal,
-  Plus,
-  RefreshCw,
-  ArrowUpRight,
-  TrendingUp,
-  AlertTriangle,
-  Mail,
-  BarChart3,
-  Target,
-  Boxes,
-} from 'lucide-react'
+import FaIcon from '../../components/common/FaIcon'
 import { motion } from 'framer-motion'
 import {
   AreaChart,
@@ -102,12 +87,12 @@ const AdminDashboard = () => {
   const orderStatusChart = orderStatusCounts.filter((s) => s.value > 0)
 
   const statsCards = [
-    { title: 'Total Products', value: overview.totalProducts, icon: Package, iconBg: 'bg-brand-light', iconColor: 'text-brand-orange', link: '/admin/products' },
-    { title: 'Total Orders', value: overview.totalOrders, icon: ShoppingCart, iconBg: 'bg-orange-50', iconColor: 'text-brand-orange-dark', link: '/admin/orders' },
-    { title: 'Store Users', value: overview.totalUsers, icon: Users, iconBg: 'bg-purple-50', iconColor: 'text-purple-600', link: '/admin/users' },
-    { title: 'Total Revenue', value: formatNpr(overview.totalRevenue), icon: Wallet, iconBg: 'bg-amber-50', iconColor: 'text-brand-amber', link: '/admin/orders', isFormatted: true },
-    { title: 'Low Stock', value: overview.lowStockCount, icon: AlertTriangle, iconBg: 'bg-red-50', iconColor: 'text-red-500', link: '/admin/reports' },
-    { title: 'Fulfillment', value: `${overview.fulfillmentRate}%`, icon: Target, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', link: '/admin/reports', isFormatted: true },
+    { title: 'Total Products', value: overview.totalProducts, icon: 'box', iconBg: 'bg-brand-light', iconColor: 'text-brand-orange', link: '/admin/products' },
+    { title: 'Total Orders', value: overview.totalOrders, icon: 'cart-shopping', iconBg: 'bg-orange-50', iconColor: 'text-brand-orange-dark', link: '/admin/orders' },
+    { title: 'Store Users', value: overview.totalUsers, icon: 'users', iconBg: 'bg-purple-50', iconColor: 'text-purple-600', link: '/admin/users' },
+    { title: 'Total Revenue', value: formatNpr(overview.totalRevenue), icon: 'wallet', iconBg: 'bg-amber-50', iconColor: 'text-brand-amber', link: '/admin/orders', isFormatted: true },
+    { title: 'Low Stock', value: overview.lowStockCount, icon: 'triangle-exclamation', iconBg: 'bg-red-50', iconColor: 'text-red-500', link: '/admin/reports' },
+    { title: 'Fulfillment', value: `${overview.fulfillmentRate}%`, icon: 'bullseye', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', link: '/admin/reports', isFormatted: true },
   ]
 
   return (
@@ -117,7 +102,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-cta text-white shadow-glow-orange">
-              <HandMetal className="h-7 w-7" />
+              <FaIcon icon="hand-sparkles" size={28} />
             </div>
             <div>
               <h2 className="text-xl font-bold text-text-primary sm:text-2xl">Welcome back, {user?.name}!</h2>
@@ -125,7 +110,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <Link to="/admin/reports" className="inline-flex items-center gap-2 rounded-xl bg-gradient-cta px-4 py-2.5 text-sm font-semibold text-white shadow-glow-orange transition-opacity hover:opacity-95">
-            <BarChart3 className="h-4 w-4" />
+            <FaIcon icon="chart-column" size={16} />
             Full Reports
           </Link>
         </div>
@@ -133,9 +118,7 @@ const AdminDashboard = () => {
 
       {/* 2. KPI cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 sm:gap-5">
-        {statsCards.map((stat, index) => {
-          const Icon = stat.icon
-          return (
+        {statsCards.map((stat, index) => (
             <motion.div key={stat.title} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
               <Link to={stat.link} className="group admin-stat-card block">
                 <div className="flex items-start justify-between gap-2">
@@ -146,16 +129,15 @@ const AdminDashboard = () => {
                     </p>
                   </div>
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${stat.iconBg} transition-transform group-hover:scale-110`}>
-                    <Icon className={`h-5 w-5 ${stat.iconColor}`} strokeWidth={2} />
+                    <FaIcon icon={stat.icon} size={20} className={stat.iconColor} />
                   </div>
                 </div>
                 <span className="mt-3 flex items-center gap-1 text-xs font-medium text-brand-orange opacity-0 transition-opacity group-hover:opacity-100">
-                  View <ArrowUpRight className="h-3 w-3" />
+                  View <FaIcon icon="arrow-up-right-from-square" size={12} />
                 </span>
               </Link>
             </motion.div>
-          )
-        })}
+          ))}
       </div>
 
       {/* 3. Revenue & orders chart */}
@@ -293,7 +275,7 @@ const AdminDashboard = () => {
         <div className="admin-card p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
-              <TrendingUp className="h-5 w-5 text-emerald-600" />
+              <FaIcon icon="chart-line" size={20} className="text-emerald-600" />
             </div>
             <div>
               <p className="text-xs text-text-muted">Avg Order Value</p>
@@ -304,7 +286,7 @@ const AdminDashboard = () => {
         <div className="admin-card p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-              <Boxes className="h-5 w-5 text-blue-600" />
+              <FaIcon icon="boxes-stacked" size={20} className="text-blue-600" />
             </div>
             <div>
               <p className="text-xs text-text-muted">Inventory Value</p>
@@ -315,7 +297,7 @@ const AdminDashboard = () => {
         <div className="admin-card p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <FaIcon icon="triangle-exclamation" size={20} className="text-red-500" />
             </div>
             <div>
               <p className="text-xs text-text-muted">Out of Stock</p>
@@ -326,7 +308,7 @@ const AdminDashboard = () => {
         <div className="admin-card p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light">
-              <Mail className="h-5 w-5 text-brand-orange" />
+              <FaIcon icon="envelope" size={20} className="text-brand-orange" />
             </div>
             <div>
               <p className="text-xs text-text-muted">Contact Messages</p>
@@ -342,7 +324,7 @@ const AdminDashboard = () => {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="admin-card p-6">
           <h3 className="mb-4 flex items-center gap-2 font-semibold text-text-primary">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light">
-              <Plus className="h-4 w-4 text-brand-orange" />
+              <FaIcon icon="plus" size={16} className="text-brand-orange" />
             </span>
             Quick Actions
           </h3>
@@ -374,7 +356,7 @@ const AdminDashboard = () => {
             onClick={loadData}
             className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-orange transition-colors hover:text-brand-orange-dark"
           >
-            <RefreshCw className="h-4 w-4" />
+            <FaIcon icon="arrows-rotate" size={16} />
             Refresh Dashboard
           </button>
         </motion.div>

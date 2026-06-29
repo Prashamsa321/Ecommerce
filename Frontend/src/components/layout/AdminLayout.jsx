@@ -97,6 +97,16 @@ function AdminLayout() {
   }, [])
 
   useEffect(() => {
+    document.documentElement.classList.add('admin-layout-active')
+    document.body.classList.add('admin-layout-active')
+
+    return () => {
+      document.documentElement.classList.remove('admin-layout-active')
+      document.body.classList.remove('admin-layout-active')
+    }
+  }, [])
+
+  useEffect(() => {
     setMobileNavOpen(false)
     setIsProfileOpen(false)
   }, [location.pathname])
@@ -156,7 +166,7 @@ function AdminLayout() {
       await logout()
       success('Logged out successfully')
       setLogoutModalOpen(false)
-      navigate('/admin/login')
+      navigate('/login')
     } catch {
       toastError('Logout failed')
     }
@@ -181,7 +191,7 @@ function AdminLayout() {
   }
 
   return (
-    <div className="admin-shell flex min-h-screen overflow-hidden bg-[#f1f5f9]">
+    <div className="admin-shell flex h-dvh max-h-dvh overflow-hidden bg-[#f1f5f9]">
       <AdminSidebar
         sidebarRef={sidebarRef}
         navGroups={adminNavGroups}
@@ -198,7 +208,7 @@ function AdminLayout() {
         initial={false}
         animate={{ marginLeft: contentMargin }}
         transition={{ duration: 0.3, ease: easeSmooth }}
-        className="flex min-h-screen w-full min-w-0 flex-1 flex-col"
+        className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-[#f1f5f9]"
       >
         <AdminHeader
           pageMeta={pageMeta}
@@ -215,8 +225,8 @@ function AdminLayout() {
           onLogoutConfirm={openLogoutConfirm}
         />
 
-        <main ref={mainRef} className="admin-main flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="admin-content mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <main ref={mainRef} className="admin-main min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-[#f1f5f9]">
+          <div className="admin-content mx-auto min-h-full w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
@@ -224,6 +234,7 @@ function AdminLayout() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
+                className="min-h-full"
               >
                 <Outlet />
               </motion.div>

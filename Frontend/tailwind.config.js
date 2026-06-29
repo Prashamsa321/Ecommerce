@@ -14,7 +14,7 @@ export default {
           amber: '#FACC15',
         },
         surface: {
-          primary: '#F8FAFC',
+          primary: '#F1F5F9',
           secondary: '#FFFFFF',
           card: '#FFFFFF',
           elevated: '#FFFFFF',

@@ -1,4 +1,5 @@
 import ProductCard from './ProductCard'
+import FaIcon from '../common/FaIcon'
 
 const ProductList = ({ products, loading, error }) => {
   if (loading) {
@@ -40,7 +41,7 @@ const ProductList = ({ products, loading, error }) => {
     return (
       <div className="text-center py-16 bg-white rounded-2xl border border-divider">
         <div className="w-16 h-16 mx-auto mb-4 bg-brand-light/30 rounded-full flex items-center justify-center">
-          <span className="text-3xl">ðŸ“¦</span>
+          <FaIcon icon="box" size={28} className="text-brand-orange/50" />
         </div>
         <p className="text-text-secondary font-medium">No products found</p>
         <p className="text-text-muted text-sm mt-1">Check back later for new arrivals</p>

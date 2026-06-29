@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import FaIcon from '../components/common/FaIcon';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const ProfilePage = () => {
   const { user, token, isAuthenticated, loading: authLoading } = useAuth();
@@ -58,7 +61,7 @@ const ProfilePage = () => {
     
     try {
       await axios.put(
-        'http://localhost:5000/api/auth/updateprofile',
+        `${API_URL}/auth/updateprofile`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -99,7 +102,7 @@ const ProfilePage = () => {
     setPasswordLoading(true);
     try {
       const response = await axios.put(
-        'http://localhost:5000/api/auth/change-password',
+        `${API_URL}/auth/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -148,7 +151,7 @@ const ProfilePage = () => {
     return (
       <div className="max-w-4xl mx-auto py-8">
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-divider p-8 text-center">
-          <div className="text-6xl mb-4">ðŸ”’</div>
+          <FaIcon icon="lock" size={48} className="text-brand-orange mb-4 mx-auto" />
           <h2 className="text-2xl font-bold text-text-primary mb-2">Not Logged In</h2>
           <p className="text-text-muted mb-6">Please login to view your profile</p>
           <a 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import FaIcon from '../common/FaIcon'
 import ProductCard from '../products/ProductCard'
 
 const ProductShowcaseSection = ({
@@ -42,7 +42,7 @@ const ProductShowcaseSection = ({
                 to={viewAllHref}
                 className="inline-flex items-center gap-2 text-sm font-semibold text-brand-orange hover:text-brand-orange-dark transition-colors"
               >
-                {viewAllLabel} <ArrowRight size={16} />
+                {viewAllLabel} <FaIcon icon="arrow-right" size={16} />
               </Link>
             )}
           </div>

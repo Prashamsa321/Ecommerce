@@ -98,13 +98,14 @@ export const verifyEmailConfig = async () => {
   }
 }
 
-const deliverEmail = async ({ to, subject, html, context, otp, name }) => {
+const deliverEmail = async ({ to, subject, html, text, context, otp, name }) => {
   const { user } = getCredentials()
   const mailOptions = {
     from: `"MeroGadget" <${user || 'noreply@merogadget.com'}>`,
     to,
     subject,
     html,
+    ...(text ? { text } : {}),
   }
 
   if (isEmailConfigured()) {
@@ -169,6 +170,7 @@ export const sendOTPEmail = async (email, otp, name) => {
     to: email,
     subject: 'Verify Your Email - MeroGadget Registration',
     html: registrationHtml(name, otp),
+    text: `Hello ${name},\n\nYour MeroGadget verification code is: ${otp}\n\nThis code expires in 10 minutes.`,
     context: 'Registration OTP',
     otp,
     name,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Star, Heart, ShoppingCart, Truck, Shield, Minus, Plus, ChevronRight } from 'lucide-react'
+import FaIcon from '../components/common/FaIcon'
 import { productService } from '../services/productService'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -55,9 +55,9 @@ const ProductDetailPage = () => {
       <div className="section-container py-8">
         <nav className="flex items-center gap-2 text-sm text-text-muted mb-8">
           <Link to="/" className="hover:text-brand-orange transition-colors">Home</Link>
-          <ChevronRight size={14} />
+          <FaIcon icon="chevron-right" size={14} />
           <Link to="/products" className="hover:text-brand-orange transition-colors">Products</Link>
-          <ChevronRight size={14} />
+          <FaIcon icon="chevron-right" size={14} />
           <span className="text-text-secondary line-clamp-1">{product.name}</span>
         </nav>
 
@@ -68,7 +68,7 @@ const ProductDetailPage = () => {
                 <img src={images[activeImage]} alt={product.name}
                   className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-500" />
               ) : (
-                <span className="text-8xl opacity-20">📦</span>
+                <span className="text-brand-orange/30"><FaIcon icon="box" size={72} /></span>
               )}
             </div>
             {images.length > 1 && (
@@ -91,7 +91,7 @@ const ProductDetailPage = () => {
 
             <div className="flex items-center gap-3 mb-6">
               <div className="flex">{[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} className={i < Math.floor(rating) ? 'text-brand-amber fill-brand-amber' : 'text-divider'} />
+                <FaIcon key={i} icon="star" size={16} className={i < Math.floor(rating) ? 'text-brand-amber' : 'text-divider'} />
               ))}</div>
               <span className="text-text-muted text-sm">{rating} (128 reviews)</span>
             </div>
@@ -106,32 +106,31 @@ const ProductDetailPage = () => {
             <div className="flex items-center gap-4 mb-8">
               <div className="flex items-center gap-3 card-premium rounded-2xl p-1">
                 <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-10 rounded-xl flex items-center justify-center text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all">
-                  <Minus size={16} />
+                  <FaIcon icon="minus" size={16} />
                 </button>
                 <span className="w-8 text-center font-semibold text-text-primary">{qty}</span>
                 <button onClick={() => setQty(q => Math.min(product.stock, q + 1))} className="w-10 h-10 rounded-xl flex items-center justify-center text-text-secondary hover:text-brand-orange hover:bg-brand-light transition-all">
-                  <Plus size={16} />
+                  <FaIcon icon="plus" size={16} />
                 </button>
               </div>
               {product.stock > 0
-                ? <span className="text-status-success text-sm font-medium">✓ {product.stock} in stock</span>
+                ? <span className="text-status-success text-sm font-medium flex items-center gap-1"><FaIcon icon="check" size={14} /> {product.stock} in stock</span>
                 : <span className="text-status-error text-sm font-medium">Out of stock</span>}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <button onClick={handleAddToCart} disabled={product.stock === 0 || adding} className="btn-cta flex-1 py-4 disabled:opacity-50">
-                <ShoppingCart size={18} /> {adding ? 'Adding...' : 'Add to Cart'}
+                <FaIcon icon="cart-shopping" size={18} /> {adding ? 'Adding...' : 'Add to Cart'}
               </button>
               <button className="btn-promo flex-1 py-4" onClick={() => { handleAddToCart(); navigate('/checkout') }}>
                 Buy Now
               </button>
-              <button className="btn-ghost px-5 py-4"><Heart size={18} /></button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {[{ icon: Truck, text: 'Free delivery over रु5,000' }, { icon: Shield, text: '1 year warranty included' }].map(({ icon: Icon, text }) => (
+              {[{ icon: 'truck', text: 'Free delivery over रु5,000' }, { icon: 'shield-halved', text: '1 year warranty included' }].map(({ icon, text }) => (
                 <div key={text} className="flex items-center gap-2 p-3 card-premium rounded-xl text-sm text-text-secondary">
-                  <Icon size={16} className="text-brand-orange shrink-0" />{text}
+                  <FaIcon icon={icon} size={16} className="text-brand-orange shrink-0" />{text}
                 </div>
               ))}
             </div>
@@ -161,7 +160,7 @@ const ProductDetailPage = () => {
             )}
             {activeTab === 'Reviews' && (
               <div className="text-center py-8 text-text-muted">
-                <Star size={32} className="mx-auto mb-3 text-brand-amber opacity-50" />
+                <FaIcon icon="star" size={32} className="mx-auto mb-3 text-brand-amber opacity-50" />
                 <p>Reviews coming soon. Be the first to review!</p>
               </div>
             )}

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import FaIcon from '../../components/common/FaIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
+
 const AdminSettings = () => {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const { success, error } = useToast();
   const [loading, setLoading] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -21,7 +24,6 @@ const AdminSettings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
     if (!passwordData.currentPassword) {
       error('Please enter your current password');
       return;
@@ -42,7 +44,7 @@ const AdminSettings = () => {
     setLoading(true);
     try {
       await axios.put(
-        'http://localhost:5000/api/auth/change-password',
+        `${API_URL}/auth/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -64,24 +66,21 @@ const AdminSettings = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-text-primary">Security Settings</h1>
         <p className="text-text-muted mt-1">Change your admin account password</p>
       </div>
 
-      {/* Change Password Card */}
       <div className="bg-white rounded-xl shadow-lg border border-divider overflow-hidden">
         <div className="bg-gradient-to-r from-brand-orange to-brand-orange-dark px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">ðŸ”’</span>
-            <h2 className="text-lg font-semibold text-text-primary">Change Password</h2>
+            <FaIcon icon="lock" size={22} className="text-white" />
+            <h2 className="text-lg font-semibold text-white">Change Password</h2>
           </div>
           <p className="text-white/80 text-sm mt-1">Update your password to keep your account secure</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Current Password */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Current Password
@@ -97,7 +96,6 @@ const AdminSettings = () => {
             />
           </div>
 
-          {/* New Password */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               New Password
@@ -113,7 +111,6 @@ const AdminSettings = () => {
             />
           </div>
 
-          {/* Confirm Password */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
               Confirm New Password
@@ -129,7 +126,6 @@ const AdminSettings = () => {
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -137,10 +133,7 @@ const AdminSettings = () => {
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+                <FaIcon icon="spinner" size={18} className="animate-spin" />
                 Changing Password...
               </>
             ) : (
@@ -150,10 +143,10 @@ const AdminSettings = () => {
         </form>
       </div>
 
-      {/* Password Tips */}
       <div className="mt-6 bg-white/50 rounded-lg p-4 border border-divider">
         <h3 className="text-sm font-semibold text-text-primary mb-2 flex items-center gap-2">
-          <span>ðŸ’¡</span> Password Tips
+          <FaIcon icon="lightbulb" size={14} className="text-brand-orange" />
+          Password Tips
         </h3>
         <ul className="text-xs text-text-muted space-y-1 ml-6 list-disc">
           <li>Use at least 6 characters</li>

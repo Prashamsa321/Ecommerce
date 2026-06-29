@@ -51,7 +51,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['COD', 'esewa'],
+    enum: ['COD', 'esewa', 'khalti'],
     default: 'COD'
   },
   paymentStatus: {
@@ -92,16 +92,15 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Generate order number before saving
-orderSchema.pre('save', async function(next) {
+orderSchema.pre('save', async function () {
   if (!this.orderNumber) {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const count = await mongoose.model('Order').countDocuments() + 1;
+    const count = (await mongoose.model('Order').countDocuments()) + 1;
     this.orderNumber = `ORD-${year}${month}-${String(count).padStart(4, '0')}`;
   }
   this.updatedAt = Date.now();
-  next();
 });
 
 const Order = mongoose.model('Order', orderSchema);

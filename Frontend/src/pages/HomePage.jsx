@@ -1,22 +1,19 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Truck, Shield, RotateCcw, Headphones, Zap, Star, ChevronLeft, ChevronRight,
-  Smartphone, Laptop, Watch, Headphones as HeadphonesIcon, Gamepad2, Camera,
-} from 'lucide-react'
+import FaIcon from '../components/common/FaIcon'
 import { productService } from '../services/productService'
 import ProductCard from '../components/products/ProductCard'
 import ProductShowcaseSection from '../components/ui/ProductShowcaseSection'
 import SectionHeader from '../components/ui/SectionHeader'
 
 const CATEGORIES = [
-  { name: 'Smartphones', icon: Smartphone, slug: 'Smartphones' },
-  { name: 'Laptops', icon: Laptop, slug: 'Laptops' },
-  { name: 'Smart Watches', icon: Watch, slug: 'Smart Watches' },
-  { name: 'Headphones', icon: HeadphonesIcon, slug: 'Headphones' },
-  { name: 'Gaming', icon: Gamepad2, slug: 'Gaming' },
-  { name: 'Cameras', icon: Camera, slug: 'Cameras' },
+  { name: 'Smartphones', icon: 'mobile-screen', slug: 'Smartphones' },
+  { name: 'Laptops', icon: 'laptop', slug: 'Laptops' },
+  { name: 'Smart Watches', icon: 'clock', slug: 'Smart Watches' },
+  { name: 'Headphones', icon: 'headphones', slug: 'Headphones' },
+  { name: 'Gaming', icon: 'gamepad', slug: 'Gaming' },
+  { name: 'Cameras', icon: 'camera', slug: 'Cameras' },
 ]
 
 const CATEGORY_SECTIONS = [
@@ -29,10 +26,10 @@ const CATEGORY_SECTIONS = [
 ]
 
 const FEATURES = [
-  { icon: Truck, title: 'Fast Delivery', desc: 'Free shipping on orders over रु5,000' },
-  { icon: Shield, title: 'Secure Payment', desc: '256-bit SSL encrypted checkout' },
-  { icon: RotateCcw, title: 'Easy Returns', desc: '30-day hassle-free return policy' },
-  { icon: Headphones, title: '24/7 Support', desc: 'Expert help whenever you need it' },
+  { icon: 'truck', title: 'Fast Delivery', desc: 'Free shipping on orders over रु5,000' },
+  { icon: 'shield-halved', title: 'Secure Payment', desc: '256-bit SSL encrypted checkout' },
+  { icon: 'rotate-left', title: 'Easy Returns', desc: '30-day hassle-free return policy' },
+  { icon: 'headphones', title: '24/7 Support', desc: 'Expert help whenever you need it' },
 ]
 
 const TESTIMONIALS = [
@@ -144,7 +141,7 @@ const HomePage = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
               <span className="badge-new mb-6 inline-flex items-center gap-2">
-                <Zap size={12} /> New Arrivals 2025
+                <FaIcon icon="bolt" size={12} /> New Arrivals 2025
               </span>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-text-primary leading-[1.1] tracking-tight mb-6">
                 The Future of{' '}
@@ -182,7 +179,9 @@ const HomePage = () => {
                     className="w-full max-h-80 object-contain animate-float drop-shadow-2xl"
                   />
                 ) : (
-                  <div className="h-80 flex items-center justify-center text-8xl opacity-30">📱</div>
+                  <div className="h-80 flex items-center justify-center text-brand-orange/30">
+                    <FaIcon icon="mobile-screen" size={72} />
+                  </div>
                 )}
                 {productSections.heroProduct && (
                   <div className="mt-6 p-4 bg-brand-light rounded-2xl border border-brand-orange/10">
@@ -203,14 +202,14 @@ const HomePage = () => {
         <div className="section-container">
           <SectionHeader badge="Categories" title="Shop by Category" subtitle="Browse electronics by type" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {CATEGORIES.map(({ name, icon: Icon, slug }, i) => (
+            {CATEGORIES.map(({ name, icon, slug }, i) => (
               <motion.div key={slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
                 <Link
                   to={`/products?category=${encodeURIComponent(slug)}`}
                   className="group block p-6 card-premium text-center hover:scale-105 transition-transform duration-300 bg-gradient-category"
                 >
                   <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-cta flex items-center justify-center shadow-glow-orange group-hover:scale-105 transition-transform">
-                    <Icon size={24} className="text-white" />
+                    <FaIcon icon={icon} size={24} className="text-white" />
                   </div>
                   <h3 className="text-text-primary font-semibold text-sm mb-1">{name}</h3>
                   <p className="text-xs text-text-muted">
@@ -254,7 +253,9 @@ const HomePage = () => {
         <div className="section-container relative">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
             <div>
-              <span className="badge-sale mb-4 inline-flex">⚡ Flash Sale</span>
+              <span className="badge-sale mb-4 inline-flex items-center gap-1.5">
+                <FaIcon icon="bolt" size={12} /> Flash Sale
+              </span>
               <h2 className="text-3xl md:text-4xl font-bold text-text-primary">Limited Time Deals</h2>
               <p className="text-text-secondary mt-2">Grab these deals before they're gone</p>
             </div>
@@ -334,7 +335,7 @@ const HomePage = () => {
         <div className="section-container">
           <SectionHeader badge="Why Us" title="Why Choose MeroGadget" subtitle="We're committed to delivering the best shopping experience" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map(({ icon: Icon, title, desc }, i) => (
+            {FEATURES.map(({ icon, title, desc }, i) => (
               <motion.div
                 key={title}
                 initial={{ opacity: 0, y: 20 }}
@@ -344,7 +345,7 @@ const HomePage = () => {
                 className="p-6 card-premium text-center group"
               >
                 <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-light flex items-center justify-center group-hover:bg-brand-orange/10 transition-colors">
-                  <Icon size={24} className="text-brand-orange" />
+                  <FaIcon icon={icon} size={24} className="text-brand-orange" />
                 </div>
                 <h3 className="text-text-primary font-semibold mb-2">{title}</h3>
                 <p className="text-sm text-text-muted">{desc}</p>
@@ -367,7 +368,7 @@ const HomePage = () => {
             >
               <div className="flex justify-center gap-1 mb-4">
                 {[...Array(TESTIMONIALS[testimonialIdx].rating)].map((_, i) => (
-                  <Star key={i} size={18} className="text-brand-amber fill-brand-amber" />
+                  <FaIcon key={i} icon="star" size={18} className="text-brand-amber" />
                 ))}
               </div>
               <p className="text-lg text-text-secondary leading-relaxed mb-6 italic">
@@ -385,10 +386,10 @@ const HomePage = () => {
             </motion.div>
             <div className="flex justify-center gap-3 mt-6">
               <button onClick={() => setTestimonialIdx(i => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)} className="w-10 h-10 rounded-xl card-premium flex items-center justify-center text-text-secondary hover:text-brand-orange transition-colors">
-                <ChevronLeft size={18} />
+                <FaIcon icon="chevron-left" size={18} />
               </button>
               <button onClick={() => setTestimonialIdx(i => (i + 1) % TESTIMONIALS.length)} className="w-10 h-10 rounded-xl card-premium flex items-center justify-center text-text-secondary hover:text-brand-orange transition-colors">
-                <ChevronRight size={18} />
+                <FaIcon icon="chevron-right" size={18} />
               </button>
             </div>
           </div>

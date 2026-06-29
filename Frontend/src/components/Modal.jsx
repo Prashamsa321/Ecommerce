@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import FaIcon from './common/FaIcon'
 
 const Modal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', cancelText = 'Cancel', type = 'warning' }) => {
   useEffect(() => {
@@ -19,9 +20,9 @@ const Modal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Conf
   }
 
   const colors = {
-    warning: { bg: 'bg-amber-50', border: 'border-status-warning', icon: 'text-status-warning', confirm: 'bg-status-warning hover:bg-amber-600' },
-    danger: { bg: 'bg-red-50', border: 'border-status-error', icon: 'text-status-error', confirm: 'bg-status-error hover:bg-red-600' },
-    info: { bg: 'bg-brand-light', border: 'border-brand-orange/30', icon: 'text-brand-orange-dark', confirm: 'bg-brand-orange hover:bg-brand-orange-dark' },
+    warning: { bg: 'bg-amber-50', border: 'border-status-warning', icon: 'text-status-warning', confirm: 'bg-status-warning hover:bg-amber-600', iconName: 'triangle-exclamation' },
+    danger: { bg: 'bg-red-50', border: 'border-status-error', icon: 'text-status-error', confirm: 'bg-status-error hover:bg-red-600', iconName: 'circle-exclamation' },
+    info: { bg: 'bg-brand-light', border: 'border-brand-orange/30', icon: 'text-brand-orange-dark', confirm: 'bg-brand-orange hover:bg-brand-orange-dark', iconName: 'circle-info' },
   }
 
   const colorStyle = colors[type] || colors.warning
@@ -31,7 +32,7 @@ const Modal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Conf
       <div className="card-premium max-w-md w-full mx-4 shadow-card-hover animate-fade-up">
         <div className={`${colorStyle.bg} rounded-t-3xl p-4 border-b ${colorStyle.border}`}>
           <div className="flex items-center gap-3">
-            <div className={`text-2xl ${colorStyle.icon}`}>⚠️</div>
+            <FaIcon icon={colorStyle.iconName} className={`text-2xl ${colorStyle.icon}`} size={24} />
             <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
           </div>
         </div>

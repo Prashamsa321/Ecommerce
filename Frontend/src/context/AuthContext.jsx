@@ -179,6 +179,15 @@ export const AuthProvider = ({ children }) => {
     delete axios.defaults.headers.common['Authorization']
   }, [])
 
+  const setAuthSession = useCallback((nextToken, nextUser) => {
+    localStorage.setItem('token', nextToken)
+    localStorage.setItem('user', JSON.stringify(nextUser))
+    setToken(nextToken)
+    setUser(nextUser)
+    setIsAuthenticated(true)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${nextToken}`
+  }, [])
+
   const value = {
     user,
     token,
@@ -188,6 +197,7 @@ export const AuthProvider = ({ children }) => {
     adminLogin,
     verifyAdmin,
     register,
+    setAuthSession,
     logout
   }
 

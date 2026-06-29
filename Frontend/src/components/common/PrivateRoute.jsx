@@ -64,9 +64,9 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
   if (!isAuthenticated) {
     return (
       <Navigate
-        to={adminOnly ? '/admin/login' : '/login'}
+        to="/login"
         replace
-        state={adminOnly ? { from: location.pathname } : undefined}
+        state={{ from: adminOnly ? location.pathname : undefined }}
       />
     );
   }

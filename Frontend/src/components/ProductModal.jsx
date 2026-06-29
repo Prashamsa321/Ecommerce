@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import FaIcon from './common/FaIcon';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -85,9 +86,10 @@ const ProductModal = ({ isOpen, onClose, product }) => {
           </div>
           <button
             onClick={onClose}
-            className="text-text-muted hover:text-white transition-all duration-300 text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-brand-light hover:scale-110"
+            className="text-text-muted hover:text-white transition-all duration-300 w-10 h-10 flex items-center justify-center rounded-full hover:bg-brand-light hover:scale-110"
+            aria-label="Close"
           >
-            âœ•
+            <FaIcon icon="xmark" size={20} />
           </button>
         </div>
 
@@ -104,7 +106,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="text-8xl opacity-30">ðŸ“¦</div>
+                  <FaIcon icon="box" size={72} className="text-brand-orange/30" />
                 )}
               </div>
               
@@ -144,11 +146,11 @@ const ProductModal = ({ isOpen, onClose, product }) => {
               {/* Price */}
               <div className="mb-4">
                 <span className="text-3xl font-bold text-brand-orange">
-                â‚¹ {product.price?.toFixed(2)}
+                  रु {product.price?.toLocaleString()}
                 </span>
                 {product.originalPrice && (
                   <span className="ml-2 text-sm text-text-muted line-through">
-                    â‚¹{product.originalPrice.toFixed(2)}
+                    रु{product.originalPrice.toLocaleString()}
                   </span>
                 )}
               </div>
@@ -158,11 +160,11 @@ const ProductModal = ({ isOpen, onClose, product }) => {
                 {product.stock > 0 ? (
                   <span className="text-sm text-brand-orange bg-brand-orange/10 px-4 py-1.5 rounded-full inline-flex items-center gap-1">
                     <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse"></span>
-                    âœ“ In Stock 
+                    <FaIcon icon="check" size={12} /> In Stock
                   </span>
                 ) : (
                   <span className="text-sm text-[#FF3B30] bg-[#FF3B30]/10 px-4 py-1.5 rounded-full inline-flex items-center gap-1">
-                    âœ— Out of Stock
+                    <FaIcon icon="xmark" size={12} /> Out of Stock
                   </span>
                 )}
               </div>

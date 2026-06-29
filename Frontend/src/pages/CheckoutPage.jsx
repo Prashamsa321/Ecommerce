@@ -1,25 +1,29 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Check, ChevronRight, MapPin, CreditCard, Package } from 'lucide-react'
+import FaIcon from '../components/common/FaIcon'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
+import { orderService } from '../services/orderService'
+import { paymentService } from '../services/paymentService'
+import { savePendingOrder } from '../utils/pendingOrder'
 
 const STEPS = [
-  { id: 1, label: 'Shipping', icon: Package },
-  { id: 2, label: 'Address', icon: MapPin },
-  { id: 3, label: 'Payment', icon: CreditCard },
-  { id: 4, label: 'Confirm', icon: Check },
+  { id: 1, label: 'Shipping', icon: 'box' },
+  { id: 2, label: 'Address', icon: 'location-dot' },
+  { id: 3, label: 'Payment', icon: 'credit-card' },
+  { id: 4, label: 'Confirm', icon: 'check' },
 ]
 
 const CheckoutPage = () => {
   const [step, setStep] = useState(1)
+  const [placing, setPlacing] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', payment: 'cod' })
   const [coupon, setCoupon] = useState('')
-  const { cartItems, getCartTotal, loading } = useCart()
+  const { cartItems, getCartTotal, loading, fetchCart } = useCart()
   const { user } = useAuth()
-  const { success } = useToast()
+  const { success, error: toastError } = useToast()
   const navigate = useNavigate()
 
   const items = Array.isArray(cartItems) ? cartItems : []
@@ -29,9 +33,53 @@ const CheckoutPage = () => {
 
   const update = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
 
-  const handlePlaceOrder = () => {
-    success('Order placed successfully! 🎉')
-    navigate('/profile')
+  const handlePlaceOrder = async () => {
+    if (!form.name.trim() || !form.phone.trim() || !form.address.trim() || !form.city.trim()) {
+      toastError('Please complete your delivery address')
+      setStep(2)
+      return
+    }
+
+    const paymentMethodMap = { cod: 'COD', esewa: 'esewa', khalti: 'khalti' }
+    const shippingAddress = {
+      fullName: form.name.trim(),
+      email: user.email,
+      phone: form.phone.trim(),
+      address: form.address.trim(),
+      city: form.city.trim(),
+      country: 'Nepal',
+    }
+
+    try {
+      setPlacing(true)
+
+      if (form.payment === 'khalti') {
+        savePendingOrder({ shippingAddress, total, paymentMethod: 'khalti' })
+        const khalti = await paymentService.initiateKhalti({
+          amount: total,
+          productId: `checkout-${Date.now()}`,
+          purchaseOrderName: `MeroGadget Order (${items.length} items)`,
+        })
+        if (khalti.payment_url) {
+          window.location.href = khalti.payment_url
+          return
+        }
+        toastError(khalti.message || 'Could not start Khalti payment')
+        return
+      }
+
+      await orderService.createOrder({
+        shippingAddress,
+        paymentMethod: paymentMethodMap[form.payment] || 'COD',
+      })
+      await fetchCart()
+      success('Order placed successfully!')
+      navigate('/profile')
+    } catch (err) {
+      toastError(err.response?.data?.message || 'Failed to place order')
+    } finally {
+      setPlacing(false)
+    }
   }
 
   if (!user) {
@@ -49,7 +97,7 @@ const CheckoutPage = () => {
     return (
       <div className="min-h-screen bg-surface-primary flex items-center justify-center section-container">
         <div className="text-center card-premium p-10">
-          <p className="text-6xl mb-4">🛒</p>
+          <FaIcon icon="cart-shopping" className="text-brand-orange mb-4" size={56} />
           <p className="text-text-primary text-xl font-semibold mb-2">Your cart is empty</p>
           <Link to="/products" className="btn-cta mt-4 inline-flex">Start Shopping</Link>
         </div>
@@ -63,14 +111,14 @@ const CheckoutPage = () => {
         <h1 className="text-3xl font-bold text-text-primary mb-8">Checkout</h1>
 
         <div className="flex items-center justify-between mb-10 max-w-2xl">
-          {STEPS.map(({ id, label, icon: Icon }, i) => (
+          {STEPS.map(({ id, label, icon }, i) => (
             <div key={id} className="flex items-center flex-1">
               <button onClick={() => id <= step && setStep(id)} className="flex flex-col items-center gap-1.5 transition-all">
                 <div className={`stepper-dot ${
                   step > id ? 'stepper-dot-done' :
                   step === id ? 'stepper-dot-active' : 'stepper-dot-pending'
                 }`}>
-                  {step > id ? <Check size={16} /> : <Icon size={16} />}
+                  {step > id ? <FaIcon icon="check" size={16} /> : <FaIcon icon={icon} size={16} />}
                 </div>
                 <span className={`text-xs font-medium hidden sm:block ${step >= id ? 'text-brand-orange' : 'text-text-muted'}`}>{label}</span>
               </button>
@@ -118,7 +166,7 @@ const CheckoutPage = () => {
               {step === 4 && (
                 <div className="text-center py-6">
                   <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Check size={32} className="text-status-success" />
+                    <FaIcon icon="check" size={32} className="text-status-success" />
                   </div>
                   <h2 className="text-xl font-semibold text-text-primary mb-2">Ready to place your order?</h2>
                   <p className="text-text-muted text-sm">Review your order and click Place Order to confirm.</p>
@@ -130,9 +178,11 @@ const CheckoutPage = () => {
                   <button onClick={() => setStep(s => s - 1)} className="btn-ghost">Back</button>
                 ) : <div />}
                 {step < 4 ? (
-                  <button onClick={() => setStep(s => s + 1)} className="btn-cta">Continue <ChevronRight size={16} /></button>
+                  <button onClick={() => setStep(s => s + 1)} className="btn-cta">Continue <FaIcon icon="chevron-right" size={16} /></button>
                 ) : (
-                  <button onClick={handlePlaceOrder} className="btn-promo">Place Order</button>
+                  <button onClick={handlePlaceOrder} disabled={placing} className="btn-promo disabled:opacity-50">
+                    {placing ? 'Placing Order...' : 'Place Order'}
+                  </button>
                 )}
               </div>
             </motion.div>

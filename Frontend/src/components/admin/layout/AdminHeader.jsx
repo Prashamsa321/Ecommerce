@@ -1,12 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Menu,
-  Plus,
-  Maximize2,
-  Minimize2,
-  ChevronRight,
-} from 'lucide-react'
+import FaIcon from '../../common/FaIcon'
 import { formatSystemTime, formatSystemDate, formatRelativeLogin } from '../../../utils/helpers'
 
 const ease = [0.4, 0, 0.2, 1]
@@ -37,7 +31,6 @@ const AdminHeader = ({
     }`}
   >
     <div className="flex flex-col gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
-      {/* Left: toggle + breadcrumb + title */}
       <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
         <motion.button
           type="button"
@@ -47,14 +40,14 @@ const AdminHeader = ({
           className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-divider bg-white text-text-secondary transition-colors duration-200 hover:border-brand-orange/30 hover:bg-brand-light hover:text-brand-orange sm:mt-0"
           aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Open menu'}
         >
-          <Menu className="h-5 w-5" strokeWidth={2.25} />
+          <FaIcon icon="bars" size={20} />
         </motion.button>
 
         <div className="min-w-0 flex-1">
           <nav className="mb-1 flex flex-wrap items-center gap-1 text-xs text-text-muted" aria-label="Breadcrumb">
             {pageMeta.crumbs.map((crumb, i) => (
               <span key={crumb} className="flex items-center gap-1">
-                {i > 0 && <ChevronRight className="h-3 w-3 shrink-0 opacity-50" />}
+                {i > 0 && <FaIcon icon="chevron-right" className="shrink-0 opacity-50" size={12} />}
                 <span className={i === pageMeta.crumbs.length - 1 ? 'font-medium text-brand-orange' : ''}>
                   {crumb}
                 </span>
@@ -65,13 +58,12 @@ const AdminHeader = ({
         </div>
       </div>
 
-      {/* Right: actions */}
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Link
           to="/admin/products/create"
           className="hidden items-center gap-1.5 rounded-xl bg-gradient-cta px-3 py-2 text-sm font-semibold text-white shadow-glow-orange transition-all duration-200 hover:opacity-95 sm:flex"
         >
-          <Plus className="h-4 w-4" />
+          <FaIcon icon="plus" size={16} />
           <span className="hidden md:inline">New Product</span>
         </Link>
 
@@ -105,7 +97,7 @@ const AdminHeader = ({
               transition={{ duration: 0.2 }}
               className="block"
             >
-              {isFullscreen ? <Minimize2 className="h-[18px] w-[18px]" /> : <Maximize2 className="h-[18px] w-[18px]" />}
+              <FaIcon icon={isFullscreen ? 'compress' : 'expand'} size={18} />
             </motion.span>
           </AnimatePresence>
         </motion.button>

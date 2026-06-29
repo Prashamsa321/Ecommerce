@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Grid3X3, ShoppingCart, User } from 'lucide-react'
+import FaIcon from '../common/FaIcon'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 
@@ -12,16 +12,16 @@ const MobileBottomNav = () => {
   if (location.pathname.startsWith('/admin')) return null
 
   const links = [
-    { to: '/', icon: Home, label: 'Home' },
-    { to: '/products', icon: Grid3X3, label: 'Shop' },
-    { to: '/cart', icon: ShoppingCart, label: 'Cart', badge: count },
-    { to: isAuthenticated ? '/profile' : '/login', icon: User, label: 'Account' },
+    { to: '/', icon: 'house', label: 'Home' },
+    { to: '/products', icon: 'store', label: 'Shop' },
+    { to: '/cart', icon: 'cart-shopping', label: 'Cart', badge: count },
+    { to: isAuthenticated ? '/profile' : '/login', icon: 'user', label: 'Account' },
   ]
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-divider safe-area-pb">
       <div className="flex items-center justify-around h-16 px-2">
-        {links.map(({ to, icon: Icon, label, badge }) => {
+        {links.map(({ to, icon, label, badge }) => {
           const active = location.pathname === to
           return (
             <Link
@@ -30,7 +30,7 @@ const MobileBottomNav = () => {
               className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 relative
                 ${active ? 'text-brand-orange' : 'text-text-muted hover:text-text-secondary'}`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+              <FaIcon icon={icon} size={20} />
               {badge > 0 && (
                 <span className="absolute -top-0.5 right-1 min-w-[18px] h-[18px] bg-brand-orange text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                   {badge > 9 ? '9+' : badge}
